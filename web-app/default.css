@@ -1,0 +1,22 @@
+:root{
+    --card-height:175px;
+}
+
+body{
+    text-align: center;
+}
+
+.card{
+    
+    display: inline-block;
+    height:var(--card-height);
+    aspect-ratio: 2/ 3;
+    margin: 1px ;
+}
+
+
+.buttoncss{
+    width:200px;
+    height:50px;
+    font-size:20px;
+}
