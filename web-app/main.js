@@ -49,15 +49,24 @@ function updatehand(){
     const handDiv = document.getElementById('hand');
     handDiv.innerHTML = '';
     hand.forEach((card, index) => {
-        const div = renderCard(card);
+        const div = renderCard(card, index);
         handDiv.appendChild(div)
     })
 }
 
-function renderCard(card) {
+function renderCard(card, index) {
     const div = document.createElement('div');
     div.className ='card';
     div.style.backgroundColor = card.color.toLowerCase();
     div.textContent = card.number;
+
+    div.onclick = () => {
+        if (card.color === currentCard.color || card.number === currentCard.number) {
+            hand.splice(index, 1);
+            currentCard = card;
+            currentCardDisplay();
+            updatehand();
+        }
+    };
     return div
 }
