@@ -1,5 +1,6 @@
 :root{
     --card-height:175px;
+    --top-container-height:34%;
 }
 
 body{
@@ -19,4 +20,36 @@ body{
     width:200px;
     height:50px;
     font-size:20px;
+}
+
+.top {
+    background-color: aqua;
+    position: absolute;
+    height: var(--top-container-height);
+    border-style: solid;
+    border-color: black;
+    width:100%;
+}
+
+.play-card {
+    position: absolute;
+    border-style: solid;
+    border-color: black;
+    width:33%;
+}
+
+.turn{
+    position: absolute;
+    border-style: solid;
+    border-color: black;
+    left:40%;
+    width:33%;
+}
+
+.hands{
+    position: absolute;
+    top:calc(2% + var(--top-container-height));
+    border-style: solid;
+    border-color: black;
+    width:100%;
 }

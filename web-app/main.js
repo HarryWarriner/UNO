@@ -11,19 +11,45 @@ let currentCard = getRandomCard();
 console.log(getRandomCard());
 let hand = [];
 let ops_hand =[];
+let turn = "yourTurn";
 
 changeCurrentCard_button.onclick = function () {
     changeCurrentCard()
+    currentTurn()
+    turn = "yourTurn";
+    hand = [];
+    ops_hand =[];
+    updatehand();
+    updateopshand();
+   
     
 }
 drawCard_button.onclick = function () {
-    drawCard()
+    if (turn === "yourTurn"){
+        drawCard();
+    }
+    
     
 }
 ops_drawCard_button.onclick = function () {
-    drawOpsCard()
+    if (turn === "opsTurn"){
+        drawOpsCard();
+    } 
+    
 }
 
+
+function currentTurn(){
+    const currentDiv = document.getElementById('currentTurn');
+    if (turn === "yourTurn"){
+        currentDiv.textContent = "your Turn";
+    } 
+    if (turn === "opsTurn"){
+        currentDiv.textContent = "Opposition's Turn";
+    } 
+    
+    
+}
 
 
 function getRandomCard(){
@@ -40,6 +66,7 @@ function currentCardDisplay(){
 function changeCurrentCard(){
     currentCard = getRandomCard();
     currentCardDisplay();
+    
 }
 
 function drawCard(){
@@ -82,11 +109,13 @@ function renderCard(card, index) {
     div.textContent = card.number;
 
     div.onclick = () => {
-        if (card.color === currentCard.color || card.number === currentCard.number) {
+        if ((card.color === currentCard.color || card.number === currentCard.number) && turn === "yourTurn" ){
             hand.splice(index, 1);
             currentCard = card;
             currentCardDisplay();
             updatehand();
+            turn = "opsTurn";
+            currentTurn()
         }
     };
     return div
@@ -98,11 +127,13 @@ function renderOpsCard(card, index) {
     div.style.backgroundColor = card.color.toLowerCase();
     div.textContent = card.number;
     div.onclick = () => {
-        if (card.color === currentCard.color || card.number === currentCard.number) {
+        if ((card.color === currentCard.color || card.number === currentCard.number) && turn === "opsTurn" ) {
             ops_hand.splice(index, 1);
             currentCard = card;
             currentCardDisplay();
             updateopshand();
+            turn = "yourTurn";
+            currentTurn()
         }
     };
 
