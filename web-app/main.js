@@ -72,7 +72,6 @@ function renderAllHands() {
 
         const title = document.createElement('h2');
         title.textContent = `Player ${index + 1}'s cards:`;
-        handSection.appendChild(title);
 
         const button = document.createElement('button');
         button.className = 'buttoncss';
@@ -80,11 +79,21 @@ function renderAllHands() {
         button.onclick = () => {
             if (turn === index) drawCard(index);
         };
-        handSection.appendChild(button);
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'hand-header';
+        headerDiv.appendChild(title);
+        headerDiv.appendChild(button);
+
+        handSection.appendChild(headerDiv);
 
         const handDiv = document.createElement('div');
         handDiv.id = `hand-${index}`;
         handSection.appendChild(handDiv);
+
+        const hr = document.createElement('hr');
+        handSection.appendChild(hr);
+
         handsContainer.appendChild(handSection);
 
         renderHand(index)
