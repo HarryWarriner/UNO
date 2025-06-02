@@ -1,6 +1,7 @@
 {
   "name": "uno",
   "version": "1.0.0",
+  "type": "module",
   "description": "UNO",
   "main": "index.js",
   "scripts": {

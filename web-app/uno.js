@@ -1,4 +1,5 @@
-import * as R from "./ramda.js";
+
+import R from "./ramda.js";
 
 /**
  * uno.js is a module to model and play "UNO".
