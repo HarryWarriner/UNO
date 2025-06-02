@@ -5,11 +5,13 @@ const colors = ['Red', 'Green', 'Blue', 'Yellow']
 let currentCard = getRandomCard();
 console.log(currentCard);
 
-let numPlayers = 4;
+let numPlayers = 2;
+const numPlayersInput = document.getElementById('numPlayersInput');
 let hands =[];
 let turn = 0 ;
 
 startGame_button.onclick = function () {
+    numPlayers = parseInt(numPlayersInput.value) || 2;
     changeCurrentCard();
     hands = Array.from({ length: numPlayers }, () => []);
     turn = 0;

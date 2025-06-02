@@ -70,6 +70,18 @@ body{
     text-align: left;
 
 }
+.numberOfPlayers{
+    display:flex;
+    align-items: center;
+    gap:10px;
+    border: solid black;
+    background: white;
+    padding: 5px;
+    width: 80%;
+    box-sizing: border-box;
+    text-align: left;
+
+}
 
 /* --- Hands --- */
 
