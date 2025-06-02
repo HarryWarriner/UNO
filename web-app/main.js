@@ -13,6 +13,8 @@ let hand = [];
 let ops_hand =[];
 let turn = "yourTurn";
 
+let numPlayers = 2;
+
 changeCurrentCard_button.onclick = function () {
     changeCurrentCard()
     currentTurn()
