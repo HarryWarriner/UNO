@@ -18,9 +18,11 @@ startGame_button.onclick = function () {
     changeCurrentCard();
     hands = Array.from({ length: numPlayers }, () => []);
     turn = 0;
-    currentTurn();
+    startTurn();
     renderAllHands();
 }
+
+
 
 // drawCard_button.onclick = function () {
 //     if (turn === 1){
@@ -36,12 +38,16 @@ startGame_button.onclick = function () {
     
 // }
 
-
-function currentTurn(){
-    turn = (turn + 1) % numPlayers;
+function startTurn(){
     const currentDiv = document.getElementById('currentTurn');
-    currentDiv.textContent = `Player ${turn}'s turn`;
-    console.log(turn);
+    currentDiv.textContent = `Player ${turn + 1}'s turn`;
+    console.log(`Turn: Player ${turn}`);
+}
+
+
+function nextTurn(){
+    turn = (turn + 1) % numPlayers;
+    startTurn();
 }
 
 function getRandomCard(){
@@ -115,7 +121,7 @@ function renderHand(index){
                 currentCard = card;
                 currentCardDisplay();
                 renderHand(index);
-                currentTurn();
+                nextTurn();
             }
         };
         handDiv.appendChild(div);
