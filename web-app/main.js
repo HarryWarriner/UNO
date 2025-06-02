@@ -1,4 +1,4 @@
-const changeCurrentCard_button = document.getElementById("changeCurrentCard");
+const startGame_button = document.getElementById("startGame");
 const drawCard_button = document.getElementById("drawCard");
 const ops_drawCard_button = document.getElementById("ops-drawCard");
 
@@ -11,30 +11,30 @@ let currentCard = getRandomCard();
 console.log(getRandomCard());
 let hand = [];
 let ops_hand =[];
-let turn = "yourTurn";
+
 
 let numPlayers = 2;
+let turn = 0 ;
 
-changeCurrentCard_button.onclick = function () {
-    changeCurrentCard()
-    currentTurn()
-    turn = "yourTurn";
+startGame_button.onclick = function () {
+    changeCurrentCard();
     hand = [];
     ops_hand =[];
+    turn = 0;
+    currentTurn();
     updatehand();
     updateopshand();
-   
-    
 }
+
 drawCard_button.onclick = function () {
-    if (turn === "yourTurn"){
+    if (turn === 1){
         drawCard();
     }
     
     
 }
 ops_drawCard_button.onclick = function () {
-    if (turn === "opsTurn"){
+    if (turn === 2){
         drawOpsCard();
     } 
     
@@ -42,15 +42,19 @@ ops_drawCard_button.onclick = function () {
 
 
 function currentTurn(){
+    turn += 1;
+    if (turn > numPlayers){
+        turn = 1;
+    }
     const currentDiv = document.getElementById('currentTurn');
-    if (turn === "yourTurn"){
-        currentDiv.textContent = "your Turn";
-    } 
-    if (turn === "opsTurn"){
-        currentDiv.textContent = "Opposition's Turn";
-    } 
-    
-    
+    currentDiv.textContent = `Player ${turn}'s turn`;
+    console.log(turn)
+    // if (turn === "yourTurn"){
+    //     currentDiv.textContent = "your Turn";
+    // } 
+    // if (turn === "opsTurn"){
+    //     currentDiv.textContent = "Opposition's Turn";
+    // } 
 }
 
 
@@ -111,12 +115,11 @@ function renderCard(card, index) {
     div.textContent = card.number;
 
     div.onclick = () => {
-        if ((card.color === currentCard.color || card.number === currentCard.number) && turn === "yourTurn" ){
+        if ((card.color === currentCard.color || card.number === currentCard.number) && turn === 1 ){
             hand.splice(index, 1);
             currentCard = card;
             currentCardDisplay();
             updatehand();
-            turn = "opsTurn";
             currentTurn()
         }
     };
@@ -129,12 +132,11 @@ function renderOpsCard(card, index) {
     div.style.backgroundColor = card.color.toLowerCase();
     div.textContent = card.number;
     div.onclick = () => {
-        if ((card.color === currentCard.color || card.number === currentCard.number) && turn === "opsTurn" ) {
+        if ((card.color === currentCard.color || card.number === currentCard.number) && turn === 2 ) {
             ops_hand.splice(index, 1);
             currentCard = card;
             currentCardDisplay();
             updateopshand();
-            turn = "yourTurn";
             currentTurn()
         }
     };

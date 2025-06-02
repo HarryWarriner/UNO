@@ -1,41 +1,49 @@
 <!-- In HTML Comments are written like this -->
 <!-- They can all be removed for your apps -->
-<!DOCTYPE html> <!-- This first line tells browsers to expect modern standard html 5 -->
+<!DOCTYPE html>
+<!-- This first line tells browsers to expect modern standard html 5 -->
 
-<html lang="en-gb"> <!-- This is indicates the page is written in British English, useful for accessibility -->
-    <head>
-<meta charset="UTF-8"> <!-- This indicates how the file is encoded. utf-8 is standard -->
-<title>UNO</title> <!-- All pages need a title, this will be displayed in the browser's title bar -->
-<meta name="viewport" content ="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="default.css"> <!-- Import style sheet – default.css -->
-<link rel="icon" href="./assets/favicon.png"> <!-- Import 'Favorites Icon' – favicon.png -->
-<script type="module" src="main.js"></script> <!-- Load the main script. Must be type="module". Have only one of these -->
-</head>
-<body>
-<div class="top">
-    <div class="play-card">
+<html lang="en-gb">
+  <!-- This is indicates the page is written in British English, useful for accessibility -->
+  <head>
+    <meta charset="UTF-8" />
+    <!-- This indicates how the file is encoded. utf-8 is standard -->
+    <title>UNO</title>
+    <!-- All pages need a title, this will be displayed in the browser's title bar -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="default.css" />
+    <!-- Import style sheet – default.css -->
+    <link rel="icon" href="./assets/favicon.png" />
+    <!-- Import 'Favorites Icon' – favicon.png -->
+    <script type="module" src="main.js"></script>
+    <!-- Load the main script. Must be type="module". Have only one of these -->
+  </head>
+  <body>
+    <div class="top">
+      <div class="play-card">
         <h2>Current Card:</h2>
         <div id="currentCard" class="card"></div>
-        <button class ="buttoncss" id="changeCurrentCard">Start Game</button>
-    </div>
-    <div class="turn">
-        <h2>Turn:</h2>
-        <div id="currentTurn"></div> 
-    </div>
-</div>
-<div class="hands">
+      </div>
 
-<h2>Your cards:</h2>
-<button class ="buttoncss" id="drawCard">Draw</button>
-<br> 
-<div id="hand"></div>
-<br>
-<hr>
-<h2>Opposition's cards:</h2>
-<button class ="buttoncss" id="ops-drawCard">Draw</button> 
-<br>
-<div id="ops-hand"></div>
-</div>
-
-</body>
+      <div class="right">
+        <div class="turn">
+          <h2>Turn:</h2>
+          <div id="currentTurn"></div>
+        </div>
+        <button class="buttoncss" id="startGame">Start Game</button>
+      </div>
+    </div>
+    <div class="hands">
+      <h2>Your cards:</h2>
+      <button class="buttoncss" id="drawCard">Draw</button>
+      <br />
+      <div id="hand"></div>
+      <br />
+      <hr />
+      <h2>Opposition's cards:</h2>
+      <button class="buttoncss" id="ops-drawCard">Draw</button>
+      <br />
+      <div id="ops-hand"></div>
+    </div>
+  </body>
 </html>

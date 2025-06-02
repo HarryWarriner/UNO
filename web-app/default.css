@@ -1,6 +1,5 @@
 :root{
     --card-height:175px;
-    --top-container-height:34%;
 }
 
 body{
@@ -22,34 +21,62 @@ body{
     font-size:20px;
 }
 
+/* ---- Top Section ---- */
+
 .top {
     background-color: aqua;
-    position: absolute;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    position: relative;
     height: var(--top-container-height);
-    border-style: solid;
-    border-color: black;
+    border: solid black;
     width:100%;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 .play-card {
-    position: absolute;
-    border-style: solid;
-    border-color: black;
-    width:33%;
+    flex: 0 0 33%;
+    border: solid black;
+    height:100%;
+    box-sizing: border-box;
+    background-color: red;
 }
+
+.right{
+    flex:1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: aquamarine;
+    padding: 0 10px;
+    box-sizing: border-box;
+    gap:10px;
+}
+
+
 
 .turn{
-    position: absolute;
-    border-style: solid;
-    border-color: black;
-    left:40%;
-    width:33%;
+    display:flex;
+    align-items: center;
+    gap:10px;
+    border: solid black;
+    background: white;
+    padding: 5px;
+    width: 80%;
+    box-sizing: border-box;
+    text-align: left;
+
 }
 
+/* --- Hands --- */
+
 .hands{
-    position: absolute;
-    top:calc(2% + var(--top-container-height));
-    border-style: solid;
-    border-color: black;
-    width:100%;
+    border: solid black;
+    width: 100%;
+    margin-top: 20px; 
+    padding: 10px;
+    box-sizing: border-box;
 }
