@@ -1,4 +1,3 @@
 /*jslint-disable*/
-import * as R from "../node_modules/ramda/es/index.js";
-export default R;
+export * from "../node_modules/ramda/es/index.js";
 /*jslint-enable*/
