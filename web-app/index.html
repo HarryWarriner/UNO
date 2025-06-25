@@ -20,17 +20,7 @@
   </head>
   <body>
     <div class="top">
-      <div class="play-card">
-        <h2>Current Card:</h2>
-        <div id="currentCard" class="card"></div>
-      </div>
-
-      <div class="mid">
-        <button class="buttoncss" id="startGame">Start Game</button>
-        <button class="buttoncss" id="unoButton">UNO</button>
-        <button class="buttoncss" id="nextPlayer">Next Player</button>
-      </div>
-      <div class="right">
+      <div class="left">
         <div class="numberOfPlayers">
           <h3>NumPlayers:</h3>
           <input
@@ -41,7 +31,22 @@
             value="4"
           />
         </div>
-        <ul id="playerStats" class="player-list"></ul>
+        <button class="buttoncss" id="startGame">Start Game</button>
+      </div>
+      <div class="uno-button-style">
+        <button class="buttoncss" id="unoButton">UNO!</button>
+      </div>
+
+      <div class="mid">
+        <h2>Current Card:</h2>
+        <div id="currentCard" class="card"></div>
+      </div>
+
+      <div class="right">
+        <div id="directionIndicator" class="arrow">⬇️</div>
+        <div class="stats">
+          <ul id="playerStats" class="player-list"></ul>
+        </div>
       </div>
     </div>
     <div class="hands" id="handsContainer"></div>

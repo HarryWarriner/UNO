@@ -12,15 +12,25 @@ let turn = 0;
 let turnFinished = false;
 let handVisible = true;
 let protectedPlayers = new Set();
+let direction = 1; // 1 : 1=>2+>3, -1: 1=>3+>2
+let skipNextPlayer = false;
+let lastSkippedPlayer = null;
+let plus4played = false;
+
+
 
 // HTML Elements
 const startGame_button = document.getElementById("startGame");
 const unoButton = document.getElementById("unoButton");
-const nextPlayer_button = document.getElementById("nextPlayer");
+// const nextPlayer_button = document.getElementById("nextPlayer");
 const numPlayersInput = document.getElementById("numPlayersInput");
 const currentCardDiv = document.getElementById("currentCard");
 const handsContainer = document.getElementById("handsContainer");
 const playerStatsList = document.getElementById("playerStats");
+const directionIndicator = document.getElementById("directionIndicator");
+
+unoButton.disabled = true;
+// nextPlayer_button.disabled = true;
 
 /**
  * Start the UNO game.
@@ -37,23 +47,37 @@ UNO.start_game = () => {
   UNO.render_current_card();
   UNO.renderAllHands();
   UNO.renderPlayerStats();
+  UNO.updateDirectionArrow();
   UNO.start_turn();
+
+  unoButton.disabled = false;
+  // nextPlayer_button.disabled = false;
 };
 
 /**
  * Start current player's turn.
  */
 UNO.start_turn = () => {
-  nextPlayer_button.textContent = "Next Player";
+  // nextPlayer_button.textContent = "Next Player";
   handVisible = true;
+  if (lastSkippedPlayer === turn) {
+    lastSkippedPlayer = null;
+  }
   protectedPlayers.delete(turn);
+  turnFinished = false;
 };
 
 /**
  * Move to next player's turn.
  */
 UNO.next_turn = () => {
-  turn = UNOLogic.nextTurn(turn, numPlayers);
+  if (skipNextPlayer) {
+    // Skip the next player
+    turn = UNOLogic.nextTurn(turn, numPlayers, direction);
+    skipNextPlayer = false;
+  }
+
+  turn = UNOLogic.nextTurn(turn, numPlayers, direction);
   UNO.start_turn();
 };
 
@@ -141,26 +165,26 @@ unoButton.onclick = () => {
 /**
  * Next player button logic
  */
-nextPlayer_button.onclick = () => {
-  if (handVisible) {
-    if (!turnFinished) {
-      alert("You must play a card before ending your turn.");
-      return;
-    }
+// nextPlayer_button.onclick = () => {
+//   if (handVisible) {
+//     if (!turnFinished) {
+//       alert("You must play a card before ending your turn.");
+//       return;
+//     }
 
-    handsContainer.innerHTML = ""; // Hide cards
-    handVisible = false;
-    nextPlayer_button.textContent = "Show Hand";
-    UNO.renderPlayerStats();
-  } else {
-    turnFinished = false;
-    UNO.next_turn();
-    UNO.renderAllHands();
-    UNO.renderPlayerStats();
-    handVisible = true;
-    nextPlayer_button.textContent = "Next Player";
-  }
-};
+//     handsContainer.innerHTML = ""; // Hide cards
+//     handVisible = false;
+//     nextPlayer_button.textContent = "Show Hand";
+//     UNO.renderPlayerStats();
+//   } else {
+//     turnFinished = false;
+//     UNO.next_turn();
+//     UNO.renderAllHands();
+//     UNO.renderPlayerStats();
+//     handVisible = true;
+//     nextPlayer_button.textContent = "Next Player";
+//   }
+// };
 
 /**
  * Render one player's hand.
@@ -181,16 +205,117 @@ UNO.render_hand = (index) => {
       if (UNOLogic.isValidPlay(card, currentCard)) {
         hands[index].splice(cardIndex, 1);
         currentCard = card;
-        turnFinished = true;
         UNO.render_current_card();
         UNO.render_hand(index);
         UNO.renderPlayerStats();
+        UNO.updateDirectionArrow();
+
+        if (card.type === "+2") {
+          const next = UNOLogic.nextTurn(turn, numPlayers, direction);
+          UNOLogic.drawCard(hands[next]);
+          UNOLogic.drawCard(hands[next]);
+          alert(`Player ${next + 1} draws 2 cards`);
+          UNO.renderPlayerStats();
+        }
+
+        if (card.type === "+4") {
+          const next = UNOLogic.nextTurn(turn, numPlayers, direction);
+          UNOLogic.drawCard(hands[next]);
+          UNOLogic.drawCard(hands[next]);
+          UNOLogic.drawCard(hands[next]);
+          UNOLogic.drawCard(hands[next]);
+          alert(`Player ${next + 1} draws 4 cards`);
+          plus4played = true;
+
+          // Prompt for new color
+          const newColor = prompt("Choose a color: Red, Green, Blue, Yellow");
+          if (UNOLogic.COLORS.includes(newColor)) {
+            currentCard.color = newColor;
+          } else {
+            alert("Invalid color chosen. Defaulting to Red.");
+            currentCard.color = "Red";
+          }
+
+          UNO.renderPlayerStats();
+          UNO.updateDirectionArrow();
+        }
+        if (card.type === "Reverse") {
+          direction *= -1; // Reverse the turn direction
+          UNO.updateDirectionArrow();
+        }
+        if (card.type === "Skip") {
+          skipNextPlayer = true;
+          lastSkippedPlayer = UNOLogic.nextTurn(turn, numPlayers, direction);
+        }
+        
+        //----- Once played:
+
+        // Clear Play Area
+        handsContainer.innerHTML = "";
+
+        // Create a container for the message and button
+        const midPageContainer = document.createElement("div");
+        midPageContainer.className = "mid-page-container";
+
+        // Create a message element
+        const message = document.createElement("div");
+        message.className = "turn-summary";
+
+        // Generate turn summary
+        let summary = `Player ${turn + 1} played ${card.type || card.number}`;
+        if (card.type === "+2") {
+          const next = UNOLogic.nextTurn(turn, numPlayers, direction);
+          summary += ` — Player ${next + 1} drew 2 cards`;
+        }
+        if (card.type === "+4") {
+          const next = UNOLogic.nextTurn(turn, numPlayers, direction);
+          summary += ` — Player ${next + 1} drew 4 cards, new color: ${currentCard.color}`;
+        }
+        if (card.type === "Reverse") {
+          summary += " — Direction reversed";
+        }
+        if (card.type === "Skip") {
+          const skipped = UNOLogic.nextTurn(turn, numPlayers, direction);
+          summary += ` — Player ${skipped + 1} was skipped`;
+        }
+
+        message.textContent = summary;
+
+        // Create the Continue button
+        const continueButton = document.createElement("button");
+        continueButton.textContent = "Continue to Next Player";
+        continueButton.className = "buttoncss";
+
+        continueButton.onclick = () => {
+          handsContainer.innerHTML = ""; // Clear everything
+          handVisible = false;
+
+          UNO.next_turn();
+          UNO.renderAllHands();
+          UNO.renderPlayerStats();
+          handVisible = true;
+        };
+
+        // Add message and button to the container
+        midPageContainer.appendChild(message);
+        midPageContainer.appendChild(continueButton);
+        handsContainer.appendChild(midPageContainer);
+
       }
     };
+
 
     handDiv.appendChild(div);
   });
 };
+
+/**
+ * Render the arrow direction
+ */
+UNO.updateDirectionArrow = () => {
+  directionIndicator.textContent = direction === 1 ? "⬇️" : "⬆️";
+}
+
 
 /**
  * Render the player stats list.
@@ -205,6 +330,9 @@ UNO.renderPlayerStats = () => {
 
     if (hand.length === 1 && protectedPlayers.has(index)) {
       text += " (UNO!)";
+    }
+    if (lastSkippedPlayer === index && turn !== index) {
+      text += " (SKIPPED)";
     }
 
     li.textContent = text;
@@ -230,10 +358,23 @@ UNO.render_current_card = () => {
  * @param {Object} card
  */
 function styleCardDiv(div, card) {
-  div.style.backgroundColor = card.color.toLowerCase();
-  div.textContent = card.number;
+  if (card.type === "+4") {
+    div.style.backgroundColor = "black";
+    div.textContent = "+4";
+  } else if (card.type === "+2") {
+    div.style.backgroundColor = card.color.toLowerCase();
+    div.textContent = "+2";
+  } else if (card.type === "Reverse"){
+    div.style.backgroundColor = card.color.toLowerCase();
+    div.textContent = "🔄";
+  } else if (card.type === "Skip"){
+    div.style.backgroundColor = card.color.toLowerCase();
+    div.textContent = "⏩"
+  } else {
+    div.style.backgroundColor = card.color.toLowerCase();
+    div.textContent = card.number;
+  }
 }
-
 // Start game on button click
 startGame_button.onclick = UNO.start_game;
 

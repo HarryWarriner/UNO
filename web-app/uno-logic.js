@@ -1,15 +1,36 @@
 import * as R from "./ramda.js";
 
 /**
- * @typedef {{ color: string, number: number }} Card
+ * @typedef {{ color: string, number: number, type?: string }} Card
  */
 
 export const COLORS = ["Red", "Green", "Blue", "Yellow"];
 
-export const getRandomCard = () => ({
-  color: R.nth(Math.floor(Math.random() * COLORS.length), COLORS),
-  number: Math.floor(Math.random() * 9) + 1,
-});
+export const getRandomCard = () => {
+  const color = R.nth(Math.floor(Math.random() * COLORS.length), COLORS);
+  const random = Math.random();
+
+  if (random < 0.1) {
+    return { type: "+2", color, number: 2 };
+  }
+
+  if (random < 0.15) {
+    return { type: "+4", number: 4 }; // Wild,
+  }
+
+  if (random < 0.20){
+    return {type: "Reverse", color};
+  }
+  if (random < 0.25) {
+    return { type: "Skip", color };
+  }
+
+  return {
+    color,
+    number: Math.floor(Math.random() * 9) + 1
+  };
+};
+
 
 /**
  * Create empty hands for each player.
@@ -39,16 +60,21 @@ export const drawCard = (hand) => {
  * @param {Card} currentCard
  * @returns {boolean}
  */
-export const isValidPlay = (card, currentCard) =>
-  card.color === currentCard.color || card.number === currentCard.number;
-
+export const isValidPlay = (card, currentCard) => {
+  if (card.type === "+4") return true; // +4 is always playable
+  return (
+    card.color === currentCard.color ||
+    (card.number !== undefined && card.number === currentCard.number) ||
+    (card.type && card.type === currentCard.type)
+  );
+};
 /**
  * Advance to next player.
  * @param {number} currentTurn
  * @param {number} numPlayers
  */
-export const nextTurn = (currentTurn, numPlayers) =>
-  (currentTurn + 1) % numPlayers;
+export const nextTurn = (currentTurn, numPlayers, direction = 1) =>
+  (currentTurn + direction + numPlayers) % numPlayers; 
 
 /**
  * Handle UNO declaration.
