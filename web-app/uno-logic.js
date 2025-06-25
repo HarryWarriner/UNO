@@ -24,7 +24,9 @@ export const getRandomCard = () => ({
  * @param {number} numPlayers
  * @returns {Card[][]}
  */
-export const createHands = (numPlayers) => R.repeat([], numPlayers);
+export const createHands = (numPlayers) =>
+  R.times(() => [], numPlayers);
+
 
 /**
  * Check if a card can be legally played on the current card.
@@ -33,10 +35,9 @@ export const createHands = (numPlayers) => R.repeat([], numPlayers);
  * @returns {boolean}
  */
 export const isValidPlay = (card, currentCard) =>
-  R.either(
-    R.equals(card.color),
-    R.equals(card.number)
-  )(currentCard.color, currentCard.number);
+  card.color === currentCard.color || card.number === currentCard.number;
+
+
 
 /**
  * Compute the next turn index.

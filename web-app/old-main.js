@@ -35,7 +35,7 @@ let turn = 0;
 
 // HTML Elements
 
-const startGame_button = document.getElementById("startGame");
+const startGame_button = document.getElementById('startGame');
 const numPlayersInput = document.getElementById('numPlayersInput');
 const currentTurnDiv = document.getElementById('currentTurn');
 const currentCardDiv = document.getElementById('currentCard');

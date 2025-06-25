@@ -29,7 +29,7 @@
 <nav >
     
     
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-UNO.html">UNO</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="UNO.html">UNO</a><ul class='methods'><li data-type='method'><a href="UNO.html#.draw_card">draw_card</a></li><li data-type='method'><a href="UNO.html#.next_turn">next_turn</a></li><li data-type='method'><a href="UNO.html#.renderAllHands">renderAllHands</a></li><li data-type='method'><a href="UNO.html#.render_current_card">render_current_card</a></li><li data-type='method'><a href="UNO.html#.render_hand">render_hand</a></li><li data-type='method'><a href="UNO.html#.start_game">start_game</a></li><li data-type='method'><a href="UNO.html#.start_turn">start_turn</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#styleCardDiv">styleCardDiv</a></li></ul>
     
 </nav>
 
@@ -45,141 +45,149 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * JavaScript logic for UNO game (Computing 2 project).
- *
- * @module UNO
- * @author Harry Warriner
- * @version 1.0.0
- * @since 2025
+            <pre class="prettyprint source linenums"><code>import * as UNOLogic from "./uno-logic.js";
+
+/**
+ * @namespace UNO
  */
+const UNO = Object.create(null);
 
-/** Game Start Button */ 
-const startGame_button = document.getElementById("startGame");
-
-const colors = ['Red', 'Green', 'Blue', 'Yellow']
-
-let currentCard = getRandomCard();
-console.log(currentCard);
-
+let currentCard = UNOLogic.getRandomCard();
 let numPlayers = 2;
-const numPlayersInput = document.getElementById('numPlayersInput');
-let hands =[];
-let turn = 0 ;
+let hands = [];
+let turn = 0;
 
-startGame_button.onclick = function () {
-    numPlayers = parseInt(numPlayersInput.value) || 2;
-    changeCurrentCard();
-    hands = Array.from({ length: numPlayers }, () => []);
-    turn = 0;
-    startTurn();
-    renderAllHands();
+// HTML Elements
+const startGame_button = document.getElementById("startGame");
+const numPlayersInput = document.getElementById("numPlayersInput");
+const currentTurnDiv = document.getElementById("currentTurn");
+const currentCardDiv = document.getElementById("currentCard");
+const handsContainer = document.getElementById("handsContainer");
+
+/**
+ * Start the UNO game.
+ */
+UNO.start_game = () => {
+  numPlayers = parseInt(numPlayersInput.value) || 2;
+  hands = UNOLogic.createHands(numPlayers);
+  currentCard = UNOLogic.getRandomCard();
+  turn = 0;
+  UNO.render_current_card();
+  UNO.renderAllHands();
+  UNO.start_turn();
+};
+
+/**
+ * Start current player's turn.
+ */
+UNO.start_turn = () => {
+  currentTurnDiv.textContent = `Player ${turn + 1}'s turn`;
+};
+
+/**
+ * Move to next player's turn.
+ */
+UNO.next_turn = () => {
+  turn = UNOLogic.nextTurn(turn, numPlayers);
+  UNO.start_turn();
+};
+
+/**
+ * Draw a card for a player.
+ * @param {number} playerIndex
+ */
+UNO.draw_card = (playerIndex) => {
+  hands[playerIndex].push(UNOLogic.getRandomCard());
+  UNO.render_hand(playerIndex);
+};
+
+/**
+ * Render all player hands and draw buttons.
+ */
+UNO.renderAllHands = () => {
+  handsContainer.innerHTML = "";
+
+  hands.forEach((_, index) => {
+    const handSection = document.createElement("div");
+    handSection.classList.add("hand-section");
+
+    const title = document.createElement("h2");
+    title.textContent = `Player ${index + 1}'s cards:`;
+
+    const button = document.createElement("button");
+    button.className = "buttoncss";
+    button.textContent = "Draw";
+    button.onclick = () => {
+      if (turn === index) UNO.draw_card(index);
+    };
+
+    const headerDiv = document.createElement("div");
+    headerDiv.className = "hand-header";
+    headerDiv.appendChild(title);
+    headerDiv.appendChild(button);
+
+    const handDiv = document.createElement("div");
+    handDiv.id = `hand-${index}`;
+
+    const hr = document.createElement("hr");
+
+    handSection.appendChild(headerDiv);
+    handSection.appendChild(handDiv);
+    handSection.appendChild(hr);
+    handsContainer.appendChild(handSection);
+
+    UNO.render_hand(index);
+  });
+};
+
+/**
+ * Render one player's hand.
+ * @param {number} index
+ */
+UNO.render_hand = (index) => {
+  const handDiv = document.getElementById(`hand-${index}`);
+  handDiv.innerHTML = "";
+
+  hands[index].forEach((card, cardIndex) => {
+    const div = document.createElement("div");
+    div.className = "card";
+    styleCardDiv(div, card);
+
+    div.onclick = () => {
+      if (turn === index &amp;&amp; UNOLogic.isValidPlay(card, currentCard)) {
+        hands[index].splice(cardIndex, 1);
+        currentCard = card;
+        UNO.render_current_card();
+        UNO.render_hand(index);
+        UNO.next_turn();
+      }
+    };
+
+    handDiv.appendChild(div);
+  });
+};
+
+/**
+ * Render the current top card.
+ */
+UNO.render_current_card = () => {
+  styleCardDiv(currentCardDiv, currentCard);
+};
+
+/**
+ * Apply style to a card div.
+ * @param {HTMLElement} div
+ * @param {Object} card
+ */
+function styleCardDiv(div, card) {
+  div.style.backgroundColor = card.color.toLowerCase();
+  div.textContent = card.number;
 }
 
+// Start game on button click
+startGame_button.onclick = UNO.start_game;
 
-function startTurn(){
-    const currentDiv = document.getElementById('currentTurn');
-    currentDiv.textContent = `Player ${turn + 1}'s turn`;
-    console.log(`Turn: Player ${turn}`);
-}
-
-
-function nextTurn(){
-    turn = (turn + 1) % numPlayers;
-    startTurn();
-}
-
-function getRandomCard(){
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const number = Math.floor(Math.random() * 9) +1;
-    return {color, number};
-}
-function currentCardDisplay(){
-    const div = document.getElementById('currentCard');
-    styleCardDiv(div, currentCard);
-   
-}
-
-function styleCardDiv(div, card){
-    div.style.backgroundColor = card.color.toLowerCase();
-    div.textContent = card.number;
-}
-
-function changeCurrentCard(){
-    currentCard = getRandomCard();
-    currentCardDisplay();
-}
-
-function drawCard(playerIndex){
-    const card = getRandomCard();
-    hands[playerIndex].push(card);
-    console.log(hands[playerIndex]);
-    renderHand(playerIndex);
-
-}
-
-
-function renderAllHands() {
-    const handsContainer = document.getElementById('handsContainer');
-    handsContainer.innerHTML= '';
-
-    hands.forEach((_, index) => {
-        const handSection = document.createElement('div');
-        handSection.classList.add('hand-section');
-
-        const title = document.createElement('h2');
-        title.textContent = `Player ${index + 1}'s cards:`;
-
-        const button = document.createElement('button');
-        button.className = 'buttoncss';
-        button.textContent = 'Draw';
-        button.onclick = () => {
-            if (turn === index) drawCard(index);
-        };
-        
-        const headerDiv = document.createElement('div');
-        headerDiv.className = 'hand-header';
-        headerDiv.appendChild(title);
-        headerDiv.appendChild(button);
-
-        handSection.appendChild(headerDiv);
-
-        const handDiv = document.createElement('div');
-        handDiv.id = `hand-${index}`;
-        handSection.appendChild(handDiv);
-
-        const hr = document.createElement('hr');
-        handSection.appendChild(hr);
-
-        handsContainer.appendChild(handSection);
-
-        renderHand(index)
-
-    });
-}
-
-function renderHand(index){
-    const handDiv = document.getElementById(`hand-${index}`);
-    handDiv.innerHTML = '';
-
-    hands[index].forEach((card, cardIndex) => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        styleCardDiv(div, card);
-
-        div.onclick = () => {
-            if ((card.color === currentCard.color || card.number === currentCard.number) &amp;&amp; turn === index) {
-                hands[index].splice(cardIndex, 1);
-                currentCard = card;
-                currentCardDisplay();
-                renderHand(index);
-                nextTurn();
-            }
-        };
-        handDiv.appendChild(div);
-    });
-}
-
+export default Object.freeze(UNO);
 </code></pre>
         </article>
     </section>
@@ -194,7 +202,7 @@ function renderHand(index){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Mon Jun 02 2025 19:33:02 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Wed Jun 25 2025 14:00:49 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
