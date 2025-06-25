@@ -2,20 +2,20 @@ import * as R from "./ramda.js";
 
 /**
  * @typedef {Object} Card
- * @property {string} color
- * @property {number} number
+ * @property {string} [color] The card's color: Red, Green, Blue, Yellow
+ * @property {number} [number] A number (1–9) if not special
  * @property {string} [type] Optional special type: "+2", "+4", "Reverse", "Skip"
  */
 
 /**
- * An array of valid UNO card colors.
+ * List of valid UNO colors
  * @type {string[]}
  */
 export const COLORS = ["Red", "Green", "Blue", "Yellow"];
 
 /**
  * Generate a random UNO card.
- * May include special types.
+ * May be a number or a special card.
  * @returns {Card}
  */
 export const getRandomCard = () => {
@@ -34,11 +34,12 @@ export const getRandomCard = () => {
 };
 
 /**
- * Create a 2D array representing all players' hands.
+ * Create empty hands for each player.
  * @param {number} numPlayers
  * @returns {Card[][]}
  */
-export const createHands = (numPlayers) => R.times(() => [], numPlayers);
+export const createHands = (numPlayers) =>
+  R.times(() => [], numPlayers);
 
 /**
  * Deal 7 random cards to each player.
@@ -49,15 +50,15 @@ export const dealHands = (numPlayers) =>
   R.times(() => R.times(getRandomCard, 7), numPlayers);
 
 /**
- * Add a card to a given hand (in-place).
+ * Return a new hand with a drawn card.
  * @param {Card[]} hand
+ * @returns {Card[]}
  */
-export const drawCard = (hand) => {
-  hand.push(getRandomCard());
-};
+export const drawCard = (hand) =>
+  [...hand, getRandomCard()];
 
 /**
- * Determine if a card can be legally played on the current card.
+ * Determine if a card can be played on the current card.
  * @param {Card} card
  * @param {Card} currentCard
  * @returns {boolean}
@@ -72,7 +73,7 @@ export const isValidPlay = (card, currentCard) => {
 };
 
 /**
- * Get the index of the next player.
+ * Determine the index of the next player.
  * @param {number} currentTurn
  * @param {number} numPlayers
  * @param {number} [direction=1]
@@ -82,11 +83,11 @@ export const nextTurn = (currentTurn, numPlayers, direction = 1) =>
   (currentTurn + direction + numPlayers) % numPlayers;
 
 /**
- * Protects a player if they correctly declare UNO.
+ * Protect a player if they correctly declare UNO.
  * @param {number} playerIndex
  * @param {Card[][]} hands
  * @param {Set<number>} protectedPlayers
- * @returns {boolean} true if declaration was valid
+ * @returns {boolean}
  */
 export const declareUno = (playerIndex, hands, protectedPlayers) => {
   if (hands[playerIndex].length === 1) {
@@ -97,7 +98,7 @@ export const declareUno = (playerIndex, hands, protectedPlayers) => {
 };
 
 /**
- * Attempt to call UNO on another player.
+ * Call UNO on other players and apply penalties.
  * @param {number} callerIndex
  * @param {Card[][]} hands
  * @param {Set<number>} protectedPlayers
@@ -110,12 +111,14 @@ export const callUno = (callerIndex, hands, protectedPlayers) => {
       hand.length === 1 &&
       !protectedPlayers.has(index)
     ) {
-      drawCard(hand);
-      drawCard(hand);
       acc.push(index);
     }
     return acc;
   }, []);
+
+  const updatedHands = hands.map((hand, index) =>
+    punishedPlayers.includes(index) ? drawCard(drawCard(hand)) : hand
+  );
 
   return {
     caught: punishedPlayers.length > 0,
@@ -125,7 +128,7 @@ export const callUno = (callerIndex, hands, protectedPlayers) => {
 };
 
 /**
- * Generate a human-readable summary of a player's action.
+ * Generate a human-readable turn summary.
  * @param {number} turn
  * @param {number} numPlayers
  * @param {number} direction
@@ -136,6 +139,7 @@ export const callUno = (callerIndex, hands, protectedPlayers) => {
 export const generateTurnSummary = (turn, numPlayers, direction, card, currentColor) => {
   const next = nextTurn(turn, numPlayers, direction);
   const base = `Player ${turn + 1} played ${card.type || card.number}`;
+
   switch (card.type) {
     case "+2":
       return `${base} - Player ${next + 1} drew 2 cards`;
@@ -153,7 +157,7 @@ export const generateTurnSummary = (turn, numPlayers, direction, card, currentCo
 };
 
 /**
- * Return visual style metadata for a card (e.g. for rendering).
+ * Return styling data for a card (e.g. for display).
  * @param {Card} card
  * @returns {{ bgColor: string, label: string }}
  */
@@ -169,5 +173,85 @@ export const getCardStyle = (card) => {
   return {
     bgColor: baseColor,
     label: labelMap[card.type] || String(card.number)
+  };
+};
+
+/**
+ * AI selects and plays a card, returning updated game state.
+ * @param {number} aiIndex
+ * @param {Card[][]} hands
+ * @param {Card} currentCard
+ * @param {number} direction
+ * @param {number} numPlayers
+ * @returns {{
+ *   updatedHands: Card[][],
+ *   newCard: Card,
+ *   direction: number,
+ *   skipNext: boolean
+ * }}
+ */
+export const performAITurn = (aiIndex, hands, currentCard, direction, numPlayers) => {
+  const hand = hands[aiIndex];
+  let skipNext = false;
+  let newDirection = direction;
+  let playedCard = null;
+
+  // Count most frequent color in hand
+  const colorCounts = COLORS.reduce((acc, color) => {
+    acc[color] = hand.filter(c => c.color === color).length;
+    return acc;
+  }, {});
+  const mostCommonColor = Object.entries(colorCounts).sort((a, b) => b[1] - a[1])[0][0];
+
+  // Prioritize cards
+  const priorities = { "+4": 0, "+2": 1, "Reverse": 2, "Skip": 3, "normal": 4 };
+  const getPriority = (card) => {
+    const typeScore = priorities[card.type] ?? priorities.normal;
+    const colorBonus = card.color === mostCommonColor ? -0.5 : 0;
+    return typeScore + colorBonus;
+  };
+
+  const validCards = hand
+    .map((c, i) => ({ card: c, index: i }))
+    .filter(({ card }) => isValidPlay(card, currentCard))
+    .sort((a, b) => getPriority(a.card) - getPriority(b.card));
+
+  let newHand = [...hand];
+  let handsCopy = [...hands];
+
+  if (validCards.length > 0) {
+    const { card, index } = validCards[0];
+    playedCard = { ...card };
+    newHand = newHand.filter((_, i) => i !== index);
+    const next = nextTurn(aiIndex, numPlayers, direction);
+
+    if (card.type === "+4") {
+      playedCard.color = mostCommonColor || COLORS[0];
+      handsCopy[next] = drawCard(drawCard(drawCard(drawCard(handsCopy[next]))));
+    }
+
+    if (card.type === "+2") {
+      handsCopy[next] = drawCard(drawCard(handsCopy[next]));
+    }
+
+    if (card.type === "Reverse") {
+      newDirection *= -1;
+    }
+
+    if (card.type === "Skip") {
+      skipNext = true;
+    }
+
+  } else {
+    newHand = drawCard(newHand);
+  }
+
+  handsCopy[aiIndex] = newHand;
+
+  return {
+    updatedHands: handsCopy,
+    newCard: playedCard || currentCard,
+    direction: newDirection,
+    skipNext
   };
 };
