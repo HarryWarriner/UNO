@@ -198,7 +198,7 @@ describe("UNO Logic", function () {
   describe("getCardStyle", function () {
     it("formats +4", function () {
       const card = { type: "+4", number: 4 };
-      assert.deepStrictEqual(UNO.getCardStyle(card), { bgColor: "black", label: "+4" });
+      assert.deepStrictEqual(UNO.getCardStyle(card), { bgColor: "wild", label: "+4" });
     });
 
     it("formats +2", function () {
