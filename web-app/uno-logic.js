@@ -162,7 +162,8 @@ export const generateTurnSummary = (turn, numPlayers, direction, card, currentCo
  * @returns {{ bgColor: string, label: string }}
  */
 export const getCardStyle = (card) => {
-  const baseColor = (card.color || "black").toLowerCase();
+  const baseColor = (card.color || "wild").toLowerCase();
+
   const labelMap = {
     "+4": "+4",
     "+2": "+2",

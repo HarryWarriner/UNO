@@ -1,0 +1,242 @@
+body {
+  margin: 0;
+  background: #005;
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+.game-board {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to bottom right, #003366, #002244);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.player {
+  position: absolute;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+}
+
+/* Hand + Label container for all sides */
+.hand-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Top Player */
+.player-top {
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Bottom Player */
+.player-bottom {
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Left Player */
+.player-left {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.player-left .hand-container {
+  transform: rotate(90deg);
+  transform-origin: center;
+}
+
+/* Right Player */
+.player-right {
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.player-right .hand-container {
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+/* Player Labels */
+.label {
+  font-weight: bold;
+  font-size: 14px;
+  color: white;
+}
+
+/* Hands */
+.hand {
+  display: flex;
+  gap: 5px;
+  position: relative;
+}
+
+/* Cards inside hands */
+.card {
+  width: 60px;
+  height: 90px;
+  border-radius: 8px;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 5px #000;
+  border: 2px solid black;
+  transition: transform 0.2s ease;
+}
+
+/* Only hand cards should overlap */
+.hand .card {
+  margin-left: -10px;
+  z-index: 1;
+}
+
+/* Hover raise for bottom player */
+.hand .card:hover {
+  transform: translateY(-10px);
+  z-index: 10;
+}
+
+
+/* Card colors */
+.card.red {
+  background: red;
+  color: white;
+}
+.card.green {
+  background: green;
+  color: white;
+}
+.card.blue {
+  background: blue;
+  color: white;
+}
+.card.yellow {
+  background: yellow;
+  color: black;
+}
+.card.wild {
+  background: linear-gradient(45deg, red, yellow, green, blue);
+  color: white;
+}
+.card.black {
+  background: black;
+  color: white;
+}
+
+/* Card back */
+.card-back {
+  background: repeating-linear-gradient(
+    45deg,
+    #444,
+    #444 5px,
+    #222 5px,
+    #222 10px
+  );
+  color: transparent;
+  border: 2px solid #000;
+}
+.card-back:hover {
+  transform: none !important;
+  z-index: 1 !important;
+}
+
+/* Center stack (deck + current card + UNO button) */
+.center-stack {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Draw button */
+.buttoncss {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background-color: #ffcc00;
+  color: black;
+  font-weight: bold;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+  transition: background-color 0.2s ease;
+}
+.buttoncss:hover {
+  background-color: #ffdd33;
+}
+
+/* Draw card button position */
+.draw-button {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 140px;
+  z-index: 1000;
+}
+
+/* Dialog modals */
+dialog {
+  border: none;
+  border-radius: 10px;
+  padding: 20px;
+  background-color: white;
+  color: black;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  text-align: center;
+  z-index: 2000;
+}
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Color picker buttons */
+#colorSelectModal .color-option {
+  margin: 5px;
+  padding: 10px 15px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.color-options button[data-color="Red"] {
+  background-color: red;
+  color: white;
+}
+.color-options button[data-color="Green"] {
+  background-color: green;
+  color: white;
+}
+.color-options button[data-color="Blue"] {
+  background-color: blue;
+  color: white;
+}
+.color-options button[data-color="Yellow"] {
+  background-color: yellow;
+  color: black;
+}
+.center-stack .card {
+  margin-left: 0;
+  transform: none;
+  z-index: initial;
+}
+.center-stack {
+  gap: 20px;
+}

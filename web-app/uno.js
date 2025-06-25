@@ -1,3 +1,4 @@
+// Full uno.js including all logic and layout compatibility
 import * as UNOLogic from "./uno-logic.js";
 
 /**
@@ -17,37 +18,74 @@ const UNO = Object.create(null);
  */
 
 // HTML Elements
-const startGame_button = document.getElementById("startGame");
-const unoButton = document.getElementById("unoButton");
-const numPlayersInput = document.getElementById("numPlayersInput");
 const currentCardDiv = document.getElementById("currentCard");
-const handsContainer = document.getElementById("handsContainer");
-const playerStatsList = document.getElementById("playerStats");
-const directionIndicator = document.getElementById("directionIndicator");
+
+const setupModal = document.getElementById("setupModal");
+const turnPopup = document.getElementById("turnPopup");
+const colorSelectModal = document.getElementById("colorSelectModal");
+const colorButtons = colorSelectModal.querySelectorAll(".color-option");
+
+const startGame_button = document.getElementById("startGame");
+const numPlayersInput = document.getElementById("numPlayersInput");
 const vsAI_checkbox = document.getElementById("vsAI");
 const showAIHand_checkbox = document.getElementById("showAIHand");
-const colorSelectModal = document.getElementById("colorSelectModal");
-const colorButtons = document.querySelectorAll(".color-option");
-const reverseAgainModal = document.getElementById("reverseAgainModal");
-const reverseContinueBtn = document.getElementById("reverseContinueBtn");
+
+const turnPopupText = document.getElementById("turnPopupText");
+const beginTurnButton = document.getElementById("beginTurnButton");
 
 
+document.addEventListener("DOMContentLoaded", () => {
+  setupModal.showModal();
 
+  startGame_button.onclick = () => {
+    numPlayers = parseInt(numPlayersInput.value) || 2;
+    aiPlayerIndex = vsAI_checkbox.checked ? 1 : null;
+    state = createInitialState();
+    turnFinished = false;
+    setupModal.close();
+    showTurnPopup();
+  };
+});
+
+// Turn popup
+beginTurnButton.onclick = () => {
+  turnPopup.close();
+  render_current_card();
+  renderAllHands();
+};
+
+function showTurnPopup() {
+  turnPopupText.textContent = `Player ${state.turn + 1}'s Turn`;
+  turnPopup.showModal();
+}
+
+// Create Draw Card button
+const drawButton = document.createElement("button");
+drawButton.id = "drawButton";
+drawButton.textContent = "Draw Card";
+drawButton.className = "buttoncss draw-button";
+
+drawButton.onclick = () => {
+  if (!turnFinished) {
+    const currentPlayer = state.turn;
+    state.hands[currentPlayer] = UNOLogic.drawCard(state.hands[currentPlayer]);
+    renderAllHands();
+  }
+};
+document.body.appendChild(drawButton);
+
+
+// Game state setup
 let aiPlayerIndex = null;
 let numPlayers = 2;
 let state = createInitialState();
-let handVisible = true;
 let turnFinished = false;
 
-/**
- * Create the initial game state.
- * @returns {GameState}
- */
 function createInitialState() {
   let card;
   do {
     card = UNOLogic.getRandomCard();
-  } while (card.type); // Start with a number card
+  } while (card.type);
 
   return {
     currentCard: card,
@@ -60,11 +98,6 @@ function createInitialState() {
   };
 }
 
-/**
- * Advance the turn and return new game state.
- * @param {GameState} s
- * @returns {GameState}
- */
 function advanceTurn(s) {
   const skip = s.skipNext ? 2 : 1;
   const nextTurn = (s.turn + skip * s.direction + s.hands.length) % s.hands.length;
@@ -77,241 +110,195 @@ function advanceTurn(s) {
   };
 }
 
-/**
- * Start a new game session.
- * @function
- */
-UNO.start_game = () => {
-  numPlayers = parseInt(numPlayersInput.value) || 2;
-  aiPlayerIndex = vsAI_checkbox.checked ? 1 : null;
-  state = createInitialState();
-  turnFinished = false;
+function rotateIndex(i) {
+  return (i - state.turn + state.hands.length) % state.hands.length;
+}
 
-  unoButton.disabled = false;
+function renderAllHands() {
+  for (let i = 0; i < state.hands.length; i++) {
+    const rotated = rotateIndex(i);
+    const handEl = document.getElementById(`hand-${rotated}`);
+    const playerEl = document.getElementById(`player-${rotated}`);
+    playerEl.className = "player"; // Reset
 
-  UNO.render_current_card();
-  UNO.renderAllHands();
-  UNO.renderPlayerStats();
-  UNO.updateDirectionArrow();
+    // Assign position classes based on visual order
+    if (rotated === 0) playerEl.classList.add("player-bottom");
+    if (rotated === 1) playerEl.classList.add("player-left");
+    if (rotated === 2) playerEl.classList.add("player-top");
+    if (rotated === 3) playerEl.classList.add("player-right");
 
-  if (state.turn === aiPlayerIndex) {
-    setTimeout(UNO.ai_play_turn, 500);
-  }
-};
+    if (!handEl || !playerEl) continue;
 
-/**
- * Begin a player's turn.
- * @function
- */
-UNO.start_turn = () => {
-  handVisible = true;
-  turnFinished = false;
-};
+    handEl.innerHTML = "";
+    const hand = state.hands[i];
+    const isCurrent = i === state.turn;
+    const isAI = i === aiPlayerIndex;
 
-/**
- * Proceed to next player.
- * @function
- */
-UNO.next_turn = () => {
-  state = advanceTurn(state);
-  UNO.start_turn();
-  UNO.renderAllHands();
-  UNO.renderPlayerStats();
+    playerEl.querySelector(".label").textContent = `Player ${i + 1}${isAI ? " (AI)" : ""}`;
 
-  if (state.turn === aiPlayerIndex) {
-    setTimeout(UNO.ai_play_turn, 800);
-  }
-};
+    const shouldHide = (isAI && !showAIHand_checkbox.checked) || (!isAI && !isCurrent);
 
-/**
- * Handle card drawing.
- * @param {number} playerIndex
- */
-UNO.draw_card = (playerIndex) => {
-  if (turnFinished) return;
+    hand.forEach((card, cardIndex) => {
+      const div = document.createElement("div");
+      div.className = "card";
 
-  const newHand = UNOLogic.drawCard(state.hands[playerIndex]);
-  state.hands = state.hands.map((h, i) => (i === playerIndex ? newHand : h));
-
-  UNO.render_hand(playerIndex);
-  UNO.renderPlayerStats();
-};
-
-/**
- * Render all player hands.
- */
-UNO.renderAllHands = () => {
-  handsContainer.innerHTML = "";
-
-  const index = state.turn;
-  const isAI = index === aiPlayerIndex;
-  const showAIHand = showAIHand_checkbox.checked;
-
-  const section = document.createElement("div");
-  section.classList.add("hand-section");
-
-  const title = document.createElement("h2");
-  title.textContent = `Player ${index + 1}'s cards:` + (isAI ? " (AI)" : "");
-
-  const drawBtn = document.createElement("button");
-  drawBtn.textContent = "Draw";
-  drawBtn.className = "buttoncss";
-  drawBtn.onclick = () => UNO.draw_card(index);
-  drawBtn.disabled = isAI;
-
-  const header = document.createElement("div");
-  header.className = "hand-header";
-  header.appendChild(title);
-  if (!isAI) header.appendChild(drawBtn);
-
-  const handDiv = document.createElement("div");
-  handDiv.id = `hand-${index}`;
-  handDiv.style.backgroundColor = isAI && showAIHand ? "red" : "";
-
-  section.appendChild(header);
-  section.appendChild(handDiv);
-  handsContainer.appendChild(section);
-
-  if (!isAI || showAIHand) {
-    UNO.render_hand(index);
-  } else {
-    handDiv.textContent = "(AI hand hidden)";
-    handDiv.style.fontStyle = "italic";
-    handDiv.style.color = "gray";
-  }
-};
-
-/**
- * Render one hand.
- * @param {number} index
- */
-UNO.render_hand = (index) => {
-  const handDiv = document.getElementById(`hand-${index}`);
-  handDiv.innerHTML = "";
-
-  state.hands[index].forEach((card, cardIndex) => {
-    const div = document.createElement("div");
-    div.className = "card";
-    styleCardDiv(div, card);
-
-    div.onclick = () => {
-      if (state.turn !== index || turnFinished) return;
-      if (!UNOLogic.isValidPlay(card, state.currentCard)) return;
-
-      const newHand = state.hands[index].filter((_, i) => i !== cardIndex);
-      state.hands = state.hands.map((h, i) => (i === index ? newHand : h));
-      state.currentCard = { ...card };
-
-      const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
-
-      if (card.type === "+2") {
-        state.hands[next] = UNOLogic.drawCard(UNOLogic.drawCard(state.hands[next]));
-      }
-
-      if (card.type === "+4") {
-        const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
-        for (let i = 0; i < 4; i++) {
-          state.hands[next] = UNOLogic.drawCard(state.hands[next]);
-        }
-
-        // Show modal and wait for color selection
-        chooseColorViaPopup().then((selectedColor) => {
-          state.currentCard.color = selectedColor;
-          finalizeCardPlay(); 
-        });
-
-        return;
-      }
-
-
-      if (card.type === "Reverse") {
-        state.direction *= -1;
-
-        if (numPlayers === 2) {
-          // 2-player special case: same player goes again
-          showReverseAgainPopup().then(() => {
-            turnFinished = false;
-            UNO.renderAllHands();
-            UNO.renderPlayerStats();
-          });
-          return; // Do not continue turn processing yet
+      if (shouldHide) {
+        div.classList.add("card-back");
+      } else {
+        styleCardDiv(div, card);
+        if (!turnFinished && isCurrent) {
+          div.onclick = () => handleCardPlay(i, cardIndex);
         }
       }
 
-
-      if (card.type === "Skip") {
-        state.skipNext = true;
-        state.lastSkipped = next;
-      }
-
-      turnFinished = true;
-      UNO.render_current_card();
-      UNO.updateDirectionArrow();
-      UNO.renderPlayerStats();
-      showTurnSummary(card);
-    };
-
-    handDiv.appendChild(div);
-  });
-};
-
-function finalizeCardPlay() {
-  UNO.render_current_card();
-  UNO.updateDirectionArrow();
-  UNO.renderPlayerStats();
-  turnFinished = true;
-  showTurnSummary(state.currentCard);
+      handEl.appendChild(div);
+    });
+  }
 }
 
 
-/**
- * Update direction indicator.
- */
-UNO.updateDirectionArrow = () => {
-  directionIndicator.textContent = state.direction === 1 ? "⬇️" : "⬆️";
-};
+function handleCardPlay(playerIndex, cardIndex) {
+  const card = state.hands[playerIndex][cardIndex];
+  if (!UNOLogic.isValidPlay(card, state.currentCard)) return;
 
-/**
- * Render current card.
- */
-UNO.render_current_card = () => {
-  styleCardDiv(currentCardDiv, state.currentCard);
-};
+  state.hands[playerIndex] = state.hands[playerIndex].filter((_, i) => i !== cardIndex);
+  state.currentCard = { ...card };
 
-/**
- * Render player stats.
- */
-UNO.renderPlayerStats = () => {
-  playerStatsList.innerHTML = "";
+  if (card.type === "+2") {
+    const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
+    state.hands[next] = UNOLogic.drawCard(UNOLogic.drawCard(state.hands[next]));
+  }
 
-  state.hands.forEach((hand, index) => {
-    const li = document.createElement("li");
-    let text = `Player ${index + 1}`;
+  if (card.type === "+4") {
+    const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
+    for (let i = 0; i < 4; i++) {
+      state.hands[next] = UNOLogic.drawCard(state.hands[next]);
+    }
+    chooseColorViaPopup().then((selectedColor) => {
+      state.currentCard.color = selectedColor;
+      finalizePlayAndAdvance(card);
+    });
+    return;
+  }
 
-    if (index === aiPlayerIndex) text += " (AI)";
-    text += `: ${hand.length} card${hand.length !== 1 ? "s" : ""}`;
+  if (card.type === "Reverse") {
+    state.direction *= -1;
+  }
 
-    if (hand.length === 1 && state.protectedPlayers.has(index)) text += " (UNO!)";
-    if (state.lastSkipped === index && state.turn !== index) text += " (SKIPPED)";
+  if (card.type === "Skip") {
+    const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
+    state.skipNext = true;
+    state.lastSkipped = next;
+  }
 
-    li.textContent = text;
-    if (index === state.turn) li.style.fontWeight = "bold";
+  finalizePlayAndAdvance(card);
+}
 
-    playerStatsList.appendChild(li);
+function finalizePlayAndAdvance(card) {
+  turnFinished = true;
+  render_current_card();
+  renderAllHands();
+
+  const handEl = document.getElementById(`hand-${rotateIndex(state.turn)}`);
+  if (handEl) {
+    handEl.querySelectorAll(".card").forEach(div => {
+      div.className = "card card-back";
+      div.textContent = "";
+    });
+  }
+
+  showTurnSummary(card);
+
+  setTimeout(() => {
+    state = advanceTurn(state);
+    turnFinished = false;
+
+    if (state.turn !== aiPlayerIndex) showTurnPopup();
+    if (state.turn === aiPlayerIndex) setTimeout(aiPlayTurn, 600);
+  }, 1500);
+}
+
+
+function chooseColorViaPopup() {
+  return new Promise((resolve) => {
+    colorSelectModal.showModal();
+    colorButtons.forEach(btn => {
+      btn.onclick = () => {
+        const color = btn.dataset.color;
+        colorSelectModal.close();
+        resolve(color);
+      };
+    });
   });
-};
+}
 
-/**
- * Handle UNO button click.
- */
+function showTurnSummary(card) {
+  const summary = document.createElement("div");
+  summary.textContent = UNOLogic.generateTurnSummary(
+    state.turn,
+    numPlayers,
+    state.direction,
+    card,
+    state.currentCard.color
+  );
+  summary.style.position = "fixed";
+  summary.style.top = "50%";
+  summary.style.left = "50%";
+  summary.style.transform = "translate(-50%, -50%)";
+  summary.style.background = "white";
+  summary.style.color = "black";
+  summary.style.padding = "10px";
+  summary.style.border = "2px solid black";
+  summary.style.zIndex = 1000;
+  summary.style.borderRadius = "8px";
+
+  document.body.appendChild(summary);
+  setTimeout(() => summary.remove(), 1300);
+}
+
+function render_current_card() {
+  styleCardDiv(currentCardDiv, state.currentCard);
+}
+
+function styleCardDiv(div, card) {
+  const { bgColor, label } = UNOLogic.getCardStyle(card);
+  div.className = `card ${bgColor}`;
+  div.textContent = label;
+}
+
+
+
+function aiPlayTurn() {
+  const result = UNOLogic.performAITurn(
+    aiPlayerIndex,
+    state.hands,
+    state.currentCard,
+    state.direction,
+    numPlayers
+  );
+
+  state.hands = result.updatedHands;
+  state.currentCard = result.newCard;
+  state.direction = result.direction;
+
+  turnFinished = true;
+  render_current_card();
+  renderAllHands();
+  showTurnSummary(state.currentCard);
+
+  setTimeout(() => {
+    state = advanceTurn(state);
+    turnFinished = false;
+    showTurnPopup();
+    if (state.turn === aiPlayerIndex) setTimeout(aiPlayTurn, 600);
+  }, 1500);
+}
+
 unoButton.onclick = () => {
-  if (!handVisible) return;
-
   const currentHand = state.hands[state.turn];
 
   if (UNOLogic.declareUno(state.turn, state.hands, state.protectedPlayers)) {
     alert("You're protected! UNO declared.");
-    UNO.renderPlayerStats();
     return;
   }
 
@@ -324,122 +311,9 @@ unoButton.onclick = () => {
   } else {
     alert("False UNO! You get 2 penalty cards.");
     state.hands[state.turn] = UNOLogic.drawCard(UNOLogic.drawCard(currentHand));
-    turnFinished = true;
   }
 
-  UNO.render_hand(state.turn);
-  UNO.renderPlayerStats();
+  renderAllHands();
 };
-
-/**
- * Handle +4 Colour picking
- */
-function chooseColorViaPopup() {
-  return new Promise((resolve) => {
-    colorSelectModal.showModal();
-    colorButtons.forEach(button => {
-      button.onclick = () => {
-        const color = button.dataset.color;
-        colorSelectModal.close();
-        resolve(color);
-      };
-    });
-  });
-}
-
-/**
- * Handle Reverse if there is only 2 players
- */
-
-function showReverseAgainPopup() {
-  return new Promise((resolve) => {
-    reverseAgainModal.showModal();
-    reverseContinueBtn.onclick = () => {
-      reverseAgainModal.close();
-      resolve();
-    };
-  });
-}
-
-
-/**
- * Handle AI turn.
- */
-UNO.ai_play_turn = () => {
-  const result = UNOLogic.performAITurn(
-    aiPlayerIndex,
-    state.hands,
-    state.currentCard,
-    state.direction,
-    numPlayers
-  );
-
-  state.hands = result.updatedHands;
-  state.currentCard = result.newCard;
-  state.direction = result.direction;
-  
-  if (numPlayers === 2 && state.direction === -1 && state.turn === aiPlayerIndex) {
-    // Reverse played by AI in 2-player game
-    state.direction = 1;
-    alert("AI played Reverse — it goes again!");
-    setTimeout(UNO.ai_play_turn, 500); // AI plays again
-    return;
-  }
-
-
-  turnFinished = true;
-  UNO.render_current_card();
-  UNO.updateDirectionArrow();
-  UNO.renderPlayerStats();
-  UNO.renderAllHands();
-
-  showTurnSummary(state.currentCard);
-};
-
-/**
- * Apply visual styling to a card.
- * @param {HTMLElement} div
- * @param {Card} card
- */
-function styleCardDiv(div, card) {
-  const { bgColor, label } = UNOLogic.getCardStyle(card);
-  div.style.backgroundColor = bgColor;
-  div.textContent = label;
-}
-
-/**
- * Show turn summary after card played.
- * @param {Card} card
- */
-function showTurnSummary(card) {
-  const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
-
-  if (next === aiPlayerIndex) {
-    UNO.next_turn();
-    return;
-  }
-
-  handsContainer.innerHTML = "";
-  const container = document.createElement("div");
-  container.className = "mid-page-container";
-
-  const summary = document.createElement("div");
-  summary.className = "turn-summary";
-  summary.textContent = UNOLogic.generateTurnSummary(
-    state.turn, numPlayers, state.direction, card, state.currentCard.color
-  );
-
-  const continueBtn = document.createElement("button");
-  continueBtn.textContent = "Continue to Next Player";
-  continueBtn.className = "buttoncss";
-  continueBtn.onclick = UNO.next_turn;
-
-  container.appendChild(summary);
-  container.appendChild(continueBtn);
-  handsContainer.appendChild(container);
-}
-
-// Attach start game button
-startGame_button.onclick = UNO.start_game;
 
 export default Object.freeze(UNO);

@@ -1,0 +1,86 @@
+<!-- In HTML Comments are written like this -->
+<!-- They can all be removed for your apps -->
+<!DOCTYPE html>
+<!-- This first line tells browsers to expect modern standard html 5 -->
+
+<html lang="en-gb">
+  <!-- This is indicates the page is written in British English, useful for accessibility -->
+  <head>
+    <meta charset="UTF-8" />
+    <!-- This indicates how the file is encoded. utf-8 is standard -->
+    <title>UNO</title>
+    <!-- All pages need a title, this will be displayed in the browser's title bar -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="default.css" />
+    <!-- Import style sheet – default.css -->
+    <link rel="icon" href="./assets/favicon.png" />
+    <!-- Import 'Favorites Icon' – favicon.png -->
+    <script type="module" src="uno.js"></script>
+    <!-- Load the main script. Must be type="module". Have only one of these -->
+  </head>
+  <body>
+    <div class="top">
+      <div class="left">
+        <div class="numberOfPlayers">
+          <h3>NumPlayers:</h3>
+          <input type="number" id="numPlayersInput" min="2" max="4" value="2" />
+        </div>
+        <button class="buttoncss" id="startGame">Start Game</button>
+        <label>
+          <input type="checkbox" id="vsAI" />
+          Add an AI
+        </label>
+        <label>
+          <input type="checkbox" id="showAIHand" checked />
+          Show AI Player's Hand
+        </label>
+      </div>
+      <div class="uno-button-style">
+        <button class="buttoncss" id="unoButton">UNO!</button>
+      </div>
+
+      <div class="mid">
+        <h2>Current Card:</h2>
+        <div id="currentCard" class="card"></div>
+      </div>
+
+      <div class="right">
+        <div id="directionIndicator" class="arrow">⬇️</div>
+        <div class="stats">
+          <ul id="playerStats" class="player-list"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="hands" id="handsContainer"></div>
+    <dialog id="reverseAgainModal">
+      <p>🔄 Reverse played! It's your turn again.</p>
+      <button id="reverseContinueBtn">Continue</button>
+    </dialog>
+
+    <dialog id="colorSelectModal">
+      <h3>Choose a color:</h3>
+      <div id="colorOptions">
+        <button class="color-option" data-color="Red" style="background: red">
+          Red
+        </button>
+        <button
+          class="color-option"
+          data-color="Green"
+          style="background: green"
+        >
+          Green
+        </button>
+        <button class="color-option" data-color="Blue" style="background: blue">
+          Blue
+        </button>
+        <button
+          class="color-option"
+          data-color="Yellow"
+          style="background: gold"
+        >
+          Yellow
+        </button>
+      </div>
+    </dialog>
+  </body>
+</html>
