@@ -118,3 +118,52 @@ export const callUno = (callerIndex, hands, protectedPlayers) => {
     falseCall: !caught,
   };
 };
+
+/**
+ * Generate a turn summary string.
+ * @param {number} turn
+ * @param {number} numPlayers
+ * @param {number} direction
+ * @param {Card} card
+ * @param {string} currentColor
+ * @returns {string}
+ */
+export const generateTurnSummary = (turn, numPlayers, direction, card, currentColor) => {
+  let summary = `Player ${turn + 1} played ${card.type || card.number}`;
+  const next = nextTurn(turn, numPlayers, direction);
+
+  if (card.type === "+2") {
+    summary += ` - Player ${next + 1} drew 2 cards`;
+  }
+  if (card.type === "+4") {
+    summary += ` - Player ${next + 1} drew 4 cards, new color: ${currentColor}`;
+  }
+  if (card.type === "Reverse") {
+    summary += " - Direction reversed";
+  }
+  if (card.type === "Skip") {
+    const skipped = next;
+    summary += ` - Player ${skipped + 1} was skipped - Player ${nextTurn(skipped, numPlayers, direction) + 1}'s Turn`;
+  }
+
+  return summary;
+};
+
+/**
+ * Get display style for a card.
+ * @param {Card} card
+ * @returns {{ bgColor: string, label: string }}
+ */
+export const getCardStyle = (card) => {
+  if (card.type === "+4") {
+    return { bgColor: "black", label: "+4" };
+  } else if (card.type === "+2") {
+    return { bgColor: card.color.toLowerCase(), label: "+2" };
+  } else if (card.type === "Reverse") {
+    return { bgColor: card.color.toLowerCase(), label: "🔄" };
+  } else if (card.type === "Skip") {
+    return { bgColor: card.color.toLowerCase(), label: "⏩" };
+  } else {
+    return { bgColor: card.color.toLowerCase(), label: String(card.number) };
+  }
+};
