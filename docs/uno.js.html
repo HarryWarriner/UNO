@@ -29,7 +29,7 @@
 <nav >
     
     
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="UNO.html">UNO</a><ul class='methods'><li data-type='method'><a href="UNO.html#.draw_card">draw_card</a></li><li data-type='method'><a href="UNO.html#.next_turn">next_turn</a></li><li data-type='method'><a href="UNO.html#.renderAllHands">renderAllHands</a></li><li data-type='method'><a href="UNO.html#.render_current_card">render_current_card</a></li><li data-type='method'><a href="UNO.html#.render_hand">render_hand</a></li><li data-type='method'><a href="UNO.html#.start_game">start_game</a></li><li data-type='method'><a href="UNO.html#.start_turn">start_turn</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#styleCardDiv">styleCardDiv</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="UNO.html">UNO</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Card">Card</a></li><li><a href="global.html#GameState">GameState</a></li><li><a href="global.html#advanceTurn">advanceTurn</a></li><li><a href="global.html#createInitialState">createInitialState</a></li><li><a href="global.html#styleCardDiv">styleCardDiv</a></li></ul>
     
 </nav>
 
@@ -52,114 +52,231 @@
  */
 const UNO = Object.create(null);
 
-let currentCard = UNOLogic.getRandomCard();
-let numPlayers = 2;
-let hands = [];
-let turn = 0;
+/**
+ * @typedef {Object} Card
+ * @property {string} color
+ * @property {number} number
+ * @property {string} [type]
+ */
+
+/**
+ * @typedef {Object} GameState
+ * @property {Card} currentCard
+ * @property {Card[][]} hands
+ * @property {number} turn
+ * @property {number} direction
+ * @property {boolean} skipNext
+ * @property {Set&lt;number>} protectedPlayers
+ * @property {number|null} lastSkipped
+ */
 
 // HTML Elements
 const startGame_button = document.getElementById("startGame");
+const unoButton = document.getElementById("unoButton");
 const numPlayersInput = document.getElementById("numPlayersInput");
-const currentTurnDiv = document.getElementById("currentTurn");
 const currentCardDiv = document.getElementById("currentCard");
 const handsContainer = document.getElementById("handsContainer");
+const playerStatsList = document.getElementById("playerStats");
+const directionIndicator = document.getElementById("directionIndicator");
+
+unoButton.disabled = true;
+
+let numPlayers = 2;
+let state = createInitialState();
+let handVisible = true;
+let turnFinished = false;
 
 /**
- * Start the UNO game.
+ * Create the initial game state.
+ * @returns {GameState}
  */
+function createInitialState() {
+  let card;
+  do {
+    card = UNOLogic.getRandomCard();
+  } while (card.type); // Ensure first card is not a special card
+
+  return {
+    currentCard: card,
+    hands: UNOLogic.dealHands(numPlayers),
+    turn: 0,
+    direction: 1,
+    skipNext: false,
+    protectedPlayers: new Set(),
+    lastSkipped: null,
+  };
+}
+
+/**
+ * @param {GameState} s
+ * @returns {GameState}
+ */
+function advanceTurn(s) {
+  const skip = s.skipNext ? 2 : 1;
+  const nextTurn = (s.turn + skip * s.direction + s.hands.length) % s.hands.length;
+  return {
+    ...s,
+    turn: nextTurn,
+    skipNext: false,
+    lastSkipped: skip === 2 ? nextTurn : null,
+    protectedPlayers: new Set([...s.protectedPlayers].filter(p => p !== nextTurn)),
+  };
+}
+
 UNO.start_game = () => {
   numPlayers = parseInt(numPlayersInput.value) || 2;
-  hands = UNOLogic.createHands(numPlayers);
-  currentCard = UNOLogic.getRandomCard();
-  turn = 0;
+  state = createInitialState();
+  turnFinished = false;
+
   UNO.render_current_card();
   UNO.renderAllHands();
-  UNO.start_turn();
+  UNO.renderPlayerStats();
+  UNO.updateDirectionArrow();
+  unoButton.disabled = false;
 };
 
-/**
- * Start current player's turn.
- */
 UNO.start_turn = () => {
-  currentTurnDiv.textContent = `Player ${turn + 1}'s turn`;
+  handVisible = true;
+  turnFinished = false;
 };
 
-/**
- * Move to next player's turn.
- */
 UNO.next_turn = () => {
-  turn = UNOLogic.nextTurn(turn, numPlayers);
+  state = advanceTurn(state);
   UNO.start_turn();
+  UNO.renderAllHands();
+  UNO.renderPlayerStats();
 };
 
-/**
- * Draw a card for a player.
- * @param {number} playerIndex
- */
 UNO.draw_card = (playerIndex) => {
-  hands[playerIndex].push(UNOLogic.getRandomCard());
+  if (turnFinished) return;
+  UNOLogic.drawCard(state.hands[playerIndex]);
   UNO.render_hand(playerIndex);
+  UNO.renderPlayerStats();
 };
 
-/**
- * Render all player hands and draw buttons.
- */
 UNO.renderAllHands = () => {
   handsContainer.innerHTML = "";
+  const index = state.turn;
 
-  hands.forEach((_, index) => {
-    const handSection = document.createElement("div");
-    handSection.classList.add("hand-section");
+  const handSection = document.createElement("div");
+  handSection.classList.add("hand-section");
 
-    const title = document.createElement("h2");
-    title.textContent = `Player ${index + 1}'s cards:`;
+  const title = document.createElement("h2");
+  title.textContent = `Player ${index + 1}'s cards:`;
 
-    const button = document.createElement("button");
-    button.className = "buttoncss";
-    button.textContent = "Draw";
-    button.onclick = () => {
-      if (turn === index) UNO.draw_card(index);
-    };
+  const button = document.createElement("button");
+  button.className = "buttoncss";
+  button.textContent = "Draw";
+  button.onclick = () => UNO.draw_card(index);
 
-    const headerDiv = document.createElement("div");
-    headerDiv.className = "hand-header";
-    headerDiv.appendChild(title);
-    headerDiv.appendChild(button);
+  const handDiv = document.createElement("div");
+  handDiv.id = `hand-${index}`;
 
-    const handDiv = document.createElement("div");
-    handDiv.id = `hand-${index}`;
+  const headerDiv = document.createElement("div");
+  headerDiv.className = "hand-header";
+  headerDiv.appendChild(title);
+  headerDiv.appendChild(button);
 
-    const hr = document.createElement("hr");
+  handSection.appendChild(headerDiv);
+  handSection.appendChild(handDiv);
+  handsContainer.appendChild(handSection);
 
-    handSection.appendChild(headerDiv);
-    handSection.appendChild(handDiv);
-    handSection.appendChild(hr);
-    handsContainer.appendChild(handSection);
-
-    UNO.render_hand(index);
-  });
+  UNO.render_hand(index);
 };
 
-/**
- * Render one player's hand.
- * @param {number} index
- */
+unoButton.onclick = () => {
+  if (!handVisible) return;
+
+  const currentHand = state.hands[state.turn];
+
+  if (UNOLogic.declareUno(state.turn, state.hands, state.protectedPlayers)) {
+    alert("You're protected! UNO declared.");
+    UNO.renderPlayerStats();
+    return;
+  }
+
+  const result = UNOLogic.callUno(state.turn, state.hands, state.protectedPlayers);
+
+  if (result.caught) {
+    result.punishedPlayers.forEach(index => {
+      alert(`Player ${index + 1} forgot to say UNO and picked up 2 penalty cards!`);
+    });
+  } else {
+    alert("False UNO! You get 2 penalty cards.");
+    UNOLogic.drawCard(currentHand);
+    UNOLogic.drawCard(currentHand);
+    turnFinished = true;
+  }
+
+  UNO.render_hand(state.turn);
+  UNO.renderPlayerStats();
+};
+
 UNO.render_hand = (index) => {
   const handDiv = document.getElementById(`hand-${index}`);
   handDiv.innerHTML = "";
 
-  hands[index].forEach((card, cardIndex) => {
+  state.hands[index].forEach((card, cardIndex) => {
     const div = document.createElement("div");
     div.className = "card";
     styleCardDiv(div, card);
 
     div.onclick = () => {
-      if (turn === index &amp;&amp; UNOLogic.isValidPlay(card, currentCard)) {
-        hands[index].splice(cardIndex, 1);
-        currentCard = card;
+      if (state.turn !== index || turnFinished) return;
+
+      if (UNOLogic.isValidPlay(card, state.currentCard)) {
+        state.hands[index].splice(cardIndex, 1);
+        state.currentCard = card;
+
+        if (card.type === "+2") {
+          const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
+          UNOLogic.drawCard(state.hands[next]);
+          UNOLogic.drawCard(state.hands[next]);
+        }
+
+        if (card.type === "+4") {
+          const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
+          R.times(() => UNOLogic.drawCard(state.hands[next]), 4);
+
+          const newColor = prompt("Choose a color: Red, Green, Blue, Yellow");
+          state.currentCard.color = UNOLogic.COLORS.includes(newColor) ? newColor : "Red";
+        }
+
+        if (card.type === "Reverse") {
+          state.direction *= -1;
+        }
+
+        if (card.type === "Skip") {
+          state.skipNext = true;
+          state.lastSkipped = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
+        }
+
         UNO.render_current_card();
-        UNO.render_hand(index);
-        UNO.next_turn();
+        UNO.updateDirectionArrow();
+        UNO.renderPlayerStats();
+
+        // Mid-turn pause UI
+        handsContainer.innerHTML = "";
+
+        const midPageContainer = document.createElement("div");
+        midPageContainer.className = "mid-page-container";
+
+        const message = document.createElement("div");
+        message.className = "turn-summary";
+        message.textContent = UNOLogic.generateTurnSummary(
+          state.turn, numPlayers, state.direction, card, state.currentCard.color
+        );
+
+        const continueButton = document.createElement("button");
+        continueButton.textContent = "Continue to Next Player";
+        continueButton.className = "buttoncss";
+        continueButton.onclick = () => UNO.next_turn();
+
+        midPageContainer.appendChild(message);
+        midPageContainer.appendChild(continueButton);
+        handsContainer.appendChild(midPageContainer);
+
+        turnFinished = true;
       }
     };
 
@@ -167,24 +284,47 @@ UNO.render_hand = (index) => {
   });
 };
 
-/**
- * Render the current top card.
- */
+UNO.updateDirectionArrow = () => {
+  directionIndicator.textContent = state.direction === 1 ? "⬇️" : "⬆️";
+};
+
+UNO.renderPlayerStats = () => {
+  playerStatsList.innerHTML = "";
+
+  state.hands.forEach((hand, index) => {
+    const li = document.createElement("li");
+    let text = `Player ${index + 1}: ${hand.length} card${hand.length !== 1 ? "s" : ""}`;
+
+    if (hand.length === 1 &amp;&amp; state.protectedPlayers.has(index)) {
+      text += " (UNO!)";
+    }
+    if (state.lastSkipped === index &amp;&amp; state.turn !== index) {
+      text += " (SKIPPED)";
+    }
+    if (index === state.turn) {
+      li.style.fontWeight = "bold";
+    }
+
+    li.textContent = text;
+    playerStatsList.appendChild(li);
+  });
+};
+
 UNO.render_current_card = () => {
-  styleCardDiv(currentCardDiv, currentCard);
+  styleCardDiv(currentCardDiv, state.currentCard);
 };
 
 /**
  * Apply style to a card div.
  * @param {HTMLElement} div
- * @param {Object} card
+ * @param {Card} card
  */
 function styleCardDiv(div, card) {
-  div.style.backgroundColor = card.color.toLowerCase();
-  div.textContent = card.number;
+  const { bgColor, label } = UNOLogic.getCardStyle(card);
+  div.style.backgroundColor = bgColor;
+  div.textContent = label;
 }
 
-// Start game on button click
 startGame_button.onclick = UNO.start_game;
 
 export default Object.freeze(UNO);
@@ -202,7 +342,7 @@ export default Object.freeze(UNO);
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Wed Jun 25 2025 14:00:49 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Wed Jun 25 2025 19:26:57 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
