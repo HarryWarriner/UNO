@@ -23,7 +23,7 @@
       <div class="left">
         <div class="numberOfPlayers">
           <h3>NumPlayers:</h3>
-          <input type="number" id="numPlayersInput" min="2" max="5" value="2" />
+          <input type="number" id="numPlayersInput" min="2" max="4" value="2" />
         </div>
         <button class="buttoncss" id="startGame">Start Game</button>
         <label>
@@ -52,5 +52,30 @@
       </div>
     </div>
     <div class="hands" id="handsContainer"></div>
+    <dialog id="colorSelectModal">
+      <h3>Choose a color:</h3>
+      <div id="colorOptions">
+        <button class="color-option" data-color="Red" style="background: red">
+          Red
+        </button>
+        <button
+          class="color-option"
+          data-color="Green"
+          style="background: green"
+        >
+          Green
+        </button>
+        <button class="color-option" data-color="Blue" style="background: blue">
+          Blue
+        </button>
+        <button
+          class="color-option"
+          data-color="Yellow"
+          style="background: gold"
+        >
+          Yellow
+        </button>
+      </div>
+    </dialog>
   </body>
 </html>

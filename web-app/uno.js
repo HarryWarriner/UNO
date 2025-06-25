@@ -26,6 +26,9 @@ const playerStatsList = document.getElementById("playerStats");
 const directionIndicator = document.getElementById("directionIndicator");
 const vsAI_checkbox = document.getElementById("vsAI");
 const showAIHand_checkbox = document.getElementById("showAIHand");
+const colorSelectModal = document.getElementById("colorSelectModal");
+const colorButtons = document.querySelectorAll(".color-option");
+
 
 let aiPlayerIndex = null;
 let numPlayers = 2;
@@ -203,12 +206,20 @@ UNO.render_hand = (index) => {
       }
 
       if (card.type === "+4") {
+        const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
         for (let i = 0; i < 4; i++) {
           state.hands[next] = UNOLogic.drawCard(state.hands[next]);
         }
-        const newColor = prompt("Choose a color: Red, Green, Blue, Yellow");
-        state.currentCard.color = UNOLogic.COLORS.includes(newColor) ? newColor : "Red";
+
+        // Show modal and wait for color selection
+        chooseColorViaPopup().then((selectedColor) => {
+          state.currentCard.color = selectedColor;
+          finalizeCardPlay(); 
+        });
+
+        return;
       }
+
 
       if (card.type === "Reverse") {
         state.direction *= -1;
@@ -229,6 +240,15 @@ UNO.render_hand = (index) => {
     handDiv.appendChild(div);
   });
 };
+
+function finalizeCardPlay() {
+  UNO.render_current_card();
+  UNO.updateDirectionArrow();
+  UNO.renderPlayerStats();
+  turnFinished = true;
+  showTurnSummary(state.currentCard);
+}
+
 
 /**
  * Update direction indicator.
@@ -296,6 +316,23 @@ unoButton.onclick = () => {
   UNO.render_hand(state.turn);
   UNO.renderPlayerStats();
 };
+
+/**
+ * Handle +4 Colour picking
+ */
+function chooseColorViaPopup() {
+  return new Promise((resolve) => {
+    colorSelectModal.showModal();
+    colorButtons.forEach(button => {
+      button.onclick = () => {
+        const color = button.dataset.color;
+        colorSelectModal.close();
+        resolve(color);
+      };
+    });
+  });
+}
+
 
 /**
  * Handle AI turn.
