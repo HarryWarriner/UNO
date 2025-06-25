@@ -28,6 +28,9 @@ const vsAI_checkbox = document.getElementById("vsAI");
 const showAIHand_checkbox = document.getElementById("showAIHand");
 const colorSelectModal = document.getElementById("colorSelectModal");
 const colorButtons = document.querySelectorAll(".color-option");
+const reverseAgainModal = document.getElementById("reverseAgainModal");
+const reverseContinueBtn = document.getElementById("reverseContinueBtn");
+
 
 
 let aiPlayerIndex = null;
@@ -223,7 +226,18 @@ UNO.render_hand = (index) => {
 
       if (card.type === "Reverse") {
         state.direction *= -1;
+
+        if (numPlayers === 2) {
+          // 2-player special case: same player goes again
+          showReverseAgainPopup().then(() => {
+            turnFinished = false;
+            UNO.renderAllHands();
+            UNO.renderPlayerStats();
+          });
+          return; // Do not continue turn processing yet
+        }
       }
+
 
       if (card.type === "Skip") {
         state.skipNext = true;
@@ -333,6 +347,20 @@ function chooseColorViaPopup() {
   });
 }
 
+/**
+ * Handle Reverse if there is only 2 players
+ */
+
+function showReverseAgainPopup() {
+  return new Promise((resolve) => {
+    reverseAgainModal.showModal();
+    reverseContinueBtn.onclick = () => {
+      reverseAgainModal.close();
+      resolve();
+    };
+  });
+}
+
 
 /**
  * Handle AI turn.
@@ -349,7 +377,15 @@ UNO.ai_play_turn = () => {
   state.hands = result.updatedHands;
   state.currentCard = result.newCard;
   state.direction = result.direction;
-  if (result.skipNext) state.skipNext = true;
+  
+  if (numPlayers === 2 && state.direction === -1 && state.turn === aiPlayerIndex) {
+    // Reverse played by AI in 2-player game
+    state.direction = 1;
+    alert("AI played Reverse — it goes again!");
+    setTimeout(UNO.ai_play_turn, 500); // AI plays again
+    return;
+  }
+
 
   turnFinished = true;
   UNO.render_current_card();
