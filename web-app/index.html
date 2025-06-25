@@ -25,11 +25,12 @@
         <div id="currentCard" class="card"></div>
       </div>
 
+      <div class="mid">
+        <button class="buttoncss" id="startGame">Start Game</button>
+        <button class="buttoncss" id="unoButton">UNO</button>
+        <button class="buttoncss" id="nextPlayer">Next Player</button>
+      </div>
       <div class="right">
-        <div class="turn">
-          <h3>Turn:</h3>
-          <div id="currentTurn"></div>
-        </div>
         <div class="numberOfPlayers">
           <h3>NumPlayers:</h3>
           <input
@@ -40,8 +41,7 @@
             value="4"
           />
         </div>
-        <button class="buttoncss" id="startGame">Start Game</button>
-        <button class="buttoncss" id="nextPlayer">Next Player</button>
+        <ul id="playerStats" class="player-list"></ul>
       </div>
     </div>
     <div class="hands" id="handsContainer"></div>

@@ -13,33 +13,38 @@ body{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    position: relative;
+    align-items: center; /* 🔥 Vertically center all content */
     height: var(--top-container-height);
     border: solid black;
-    width:100%;
+    width: 100%;
     padding: 10px;
     box-sizing: border-box;
+    gap: 10px; /* space between sections */
 }
 
-.play-card {
-    flex: 0 0 33%;
-    border: solid black;
-    height:100%;
+/* All 3 columns */
+.play-card,
+.mid,
+.right {
+    flex: 1;
+    height: 100%;
     box-sizing: border-box;
-    background-color: yellowgreen;
-}
-
-.right{
-    flex:1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: aquamarine;
-    padding: 0 10px;
-    box-sizing: border-box;
-    gap:10px;
+    justify-content: center; /* 🔥 Center vertically */
+    align-items: center;     /* 🔥 Center horizontally */
+    padding: 10px;
 }
+
+/* Section-specific backgrounds for clarity (optional) */
+.play-card {
+    background-color: yellowgreen;
+}
+.mid,
+.right {
+    background-color: aquamarine;
+}
+    
 
 
 
@@ -67,7 +72,21 @@ body{
     text-align: left;
 
 }
+.player-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    text-align: left;
+    font-size: 18px;
+}
 
+.player-list li {
+    padding: 4px 8px;
+    background: white;
+    border: 1px solid black;
+    margin-bottom: 4px;
+}
 /* --- Hands --- */
 
 .hand-header{

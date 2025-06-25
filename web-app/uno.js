@@ -10,25 +10,33 @@ let numPlayers = 2;
 let hands = [];
 let turn = 0;
 let turnFinished = false;
+let handVisible = true;
+let protectedPlayers = new Set();
 
 // HTML Elements
 const startGame_button = document.getElementById("startGame");
+const unoButton = document.getElementById("unoButton");
 const nextPlayer_button = document.getElementById("nextPlayer");
 const numPlayersInput = document.getElementById("numPlayersInput");
-const currentTurnDiv = document.getElementById("currentTurn");
 const currentCardDiv = document.getElementById("currentCard");
 const handsContainer = document.getElementById("handsContainer");
+const playerStatsList = document.getElementById("playerStats");
 
 /**
  * Start the UNO game.
  */
 UNO.start_game = () => {
   numPlayers = parseInt(numPlayersInput.value) || 2;
-  hands = UNOLogic.createHands(numPlayers);
+  hands = UNOLogic.dealHands(numPlayers);
+
   currentCard = UNOLogic.getRandomCard();
   turn = 0;
+  turnFinished = false;
+  protectedPlayers.clear();
+
   UNO.render_current_card();
   UNO.renderAllHands();
+  UNO.renderPlayerStats();
   UNO.start_turn();
 };
 
@@ -36,8 +44,9 @@ UNO.start_game = () => {
  * Start current player's turn.
  */
 UNO.start_turn = () => {
-  turnFinished = false;
-  currentTurnDiv.textContent = `Player ${turn + 1}'s turn`;
+  nextPlayer_button.textContent = "Next Player";
+  handVisible = true;
+  protectedPlayers.delete(turn);
 };
 
 /**
@@ -53,48 +62,15 @@ UNO.next_turn = () => {
  * @param {number} playerIndex
  */
 UNO.draw_card = (playerIndex) => {
-  hands[playerIndex].push(UNOLogic.getRandomCard());
+  if (turnFinished) return;
+  UNOLogic.drawCard(hands[playerIndex]);
   UNO.render_hand(playerIndex);
+  UNO.renderPlayerStats();
 };
 
 /**
  * Render all player hands and draw buttons.
  */
-// UNO.renderAllHands = () => {
-//   handsContainer.innerHTML = "";
-
-//   hands.forEach((_, index) => {
-//     const handSection = document.createElement("div");
-//     handSection.classList.add("hand-section");
-
-//     const title = document.createElement("h2");
-//     title.textContent = `Player ${index + 1}'s cards:`;
-
-//     const button = document.createElement("button");
-//     button.className = "buttoncss";
-//     button.textContent = "Draw";
-//     button.onclick = () => {
-//       if (turn === index) UNO.draw_card(index);
-//     };
-
-//     const headerDiv = document.createElement("div");
-//     headerDiv.className = "hand-header";
-//     headerDiv.appendChild(title);
-//     headerDiv.appendChild(button);
-
-//     const handDiv = document.createElement("div");
-//     handDiv.id = `hand-${index}`;
-
-//     const hr = document.createElement("hr");
-
-//     handSection.appendChild(headerDiv);
-//     handSection.appendChild(handDiv);
-//     handSection.appendChild(hr);
-//     handsContainer.appendChild(handSection);
-
-//     UNO.render_hand(index);
-//   });
-// };
 UNO.renderAllHands = () => {
   handsContainer.innerHTML = "";
 
@@ -129,12 +105,60 @@ UNO.renderAllHands = () => {
   UNO.render_hand(index);
 };
 
+/**
+ * UNO button logic
+ */
+unoButton.onclick = () => {
+  if (!handVisible) return;
+
+  const currentHand = hands[turn];
+
+  // Try to declare UNO for current player
+  if (UNOLogic.declareUno(turn, hands, protectedPlayers)) {
+    alert("You're protected! UNO declared.");
+    UNO.renderPlayerStats();
+    return;
+  }
+
+  // Try to catch others
+  const result = UNOLogic.callUno(turn, hands, protectedPlayers);
+
+  if (result.caught) {
+    result.punishedPlayers.forEach(index => {
+      alert(`Player ${index + 1} forgot to say UNO and picked up 2 penalty cards!`);
+    });
+  } else {
+    alert("False UNO! You get 2 penalty cards.");
+    UNOLogic.drawCard(currentHand);
+    UNOLogic.drawCard(currentHand);
+    turnFinished = true;
+  }
+
+  UNO.render_hand(turn);
+  UNO.renderPlayerStats();
+};
+
+/**
+ * Next player button logic
+ */
 nextPlayer_button.onclick = () => {
-  if (turnFinished) {
+  if (handVisible) {
+    if (!turnFinished) {
+      alert("You must play a card before ending your turn.");
+      return;
+    }
+
+    handsContainer.innerHTML = ""; // Hide cards
+    handVisible = false;
+    nextPlayer_button.textContent = "Show Hand";
+    UNO.renderPlayerStats();
+  } else {
+    turnFinished = false;
     UNO.next_turn();
     UNO.renderAllHands();
-  } else {
-    alert("You must play a card before ending your turn.");
+    UNO.renderPlayerStats();
+    handVisible = true;
+    nextPlayer_button.textContent = "Next Player";
   }
 };
 
@@ -152,17 +176,44 @@ UNO.render_hand = (index) => {
     styleCardDiv(div, card);
 
     div.onclick = () => {
-      if (turn === index && UNOLogic.isValidPlay(card, currentCard)) {
+      if (turn !== index || turnFinished) return;
+
+      if (UNOLogic.isValidPlay(card, currentCard)) {
         hands[index].splice(cardIndex, 1);
         currentCard = card;
         turnFinished = true;
         UNO.render_current_card();
         UNO.render_hand(index);
-        UNO.next_turn();
+        UNO.renderPlayerStats();
       }
     };
 
     handDiv.appendChild(div);
+  });
+};
+
+/**
+ * Render the player stats list.
+ */
+UNO.renderPlayerStats = () => {
+  playerStatsList.innerHTML = "";
+
+  hands.forEach((hand, index) => {
+    const li = document.createElement("li");
+
+    let text = `Player ${index + 1}: ${hand.length} card${hand.length !== 1 ? "s" : ""}`;
+
+    if (hand.length === 1 && protectedPlayers.has(index)) {
+      text += " (UNO!)";
+    }
+
+    li.textContent = text;
+
+    if (index === turn) {
+      li.style.fontWeight = "bold";
+    }
+
+    playerStatsList.appendChild(li);
   });
 };
 
