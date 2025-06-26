@@ -17,7 +17,6 @@ import * as UNOLogic from "./uno-logic.js";
  * @property {boolean} [pendingColorChange]
  */
 
-// DOM Elements
 const el = (id) => document.getElementById(id);
 
 const currentCardDiv = el("currentCard");
@@ -27,9 +26,8 @@ const turnPopupText = el("turnPopupText");
 const beginTurnButton = el("beginTurnButton");
 const colorSelectModal = el("colorSelectModal");
 const colorButtons = colorSelectModal.querySelectorAll(".color-option");
-const drawButton = el("drawButton")
+const drawButton = el("drawButton");
 
-// Game State
 let aiPlayerIndex = null;
 let numPlayers = 2;
 let state = createInitialState();
@@ -39,7 +37,7 @@ function createInitialState() {
   let card;
   do {
     card = UNOLogic.getRandomCard();
-  } while (card.type); // ensure starting card is not a special
+  } while (card.type);
 
   return {
     currentCard: card,
@@ -48,7 +46,7 @@ function createInitialState() {
     direction: 1,
     skipNext: false,
     protectedPlayers: new Set(),
-    lastSkipped: null,
+    lastSkipped: null
   };
 }
 
@@ -66,258 +64,18 @@ function advanceTurn(prevState) {
   };
 }
 
-// UI Initialization
-document.addEventListener("DOMContentLoaded", () => {
-  setupModal.showModal();
-
-  el("startGame").onclick = () => {
-    numPlayers = parseInt(el("numPlayersInput").value) || 2;
-    aiPlayerIndex = el("vsAI").checked ? 1 : null;
-    state = createInitialState();
-    renderPlayerLabels();
-    turnFinished = false;
-    setupModal.close();
-    for (let i = 0; i < 4; i++) {
-      const playerEl = el(`player-${i}`);
-      const labelEl = el(`playerLabel${i}`);
-      const countEl = el(`cardCount${i}`);
-      const labelSlot = el(`label-slot-${i}`);
-
-      const isActive = i < numPlayers;
-
-      if (playerEl) playerEl.style.display = isActive ? "" : "none";
-      if (labelSlot) labelSlot.style.display = isActive ? "" : "none";
-      if (labelEl) {
-        labelEl.textContent = isActive ? `Player ${i + 1}${i === aiPlayerIndex ? " (AI)" : ""}` : "";
-        labelEl.style.display = isActive ? "" : "none";
-      }
-      if (countEl) {
-        countEl.textContent = isActive ? state.hands[i].length : "";
-        countEl.style.display = isActive ? "" : "none";
-      }
-    }
-
-    showTurnPopup();
-    updateDirectionArrows();
-  };
-});
-
-beginTurnButton.onclick = () => {
-  turnPopup.close();
-  render_current_card();
-  renderAllHands();
-};
-
-drawButton.onclick = () => {
-  if (!turnFinished) {
-    state = {
-      ...state,
-      hands: drawCardForPlayer(state.turn, state.hands)
-    };
-    renderAllHands();
-  }
-};
+function rotateIndex(i) {
+  return (i - state.turn + state.hands.length) % state.hands.length;
+}
 
 function drawCardForPlayer(playerIndex, hands) {
   return hands.map((hand, i) => i === playerIndex ? UNOLogic.drawCard(hand) : hand);
 }
 
-function rotateIndex(i) {
-  return (i - state.turn + state.hands.length) % state.hands.length;
-}
-
-function renderAllHands() {
-  state.hands.forEach((hand, i) => {
-    if (i >= numPlayers) return;
-    const rotated = rotateIndex(i);
-    const handEl = el(`hand-${rotated}`);
-    const playerEl = el(`player-${rotated}`);
-    if (!handEl || !playerEl) return;
-
-    playerEl.className = "player";
-    playerEl.classList.add(["player-bottom", "player-left", "player-top", "player-right"][rotated]);
-    const labelEl = document.getElementById(`playerLabel${i}`);
-    if (labelEl) {
-      labelEl.textContent = `Player ${i + 1}${i === aiPlayerIndex ? " (AI)" : ""}`;
-    }
-
-    const countEl = document.getElementById(`cardCount${i}`);
-    if (countEl) {
-      countEl.textContent = hand.length;
-    }
-
-
-
-    const isCurrent = i === state.turn;
-    const isAI = i === aiPlayerIndex;
-    const shouldHide = (isAI && !el("showAIHand").checked) || (!isAI && !isCurrent);
-
-    handEl.innerHTML = "";
-    hand.forEach((card, cardIndex) => {
-      const div = document.createElement("div");
-      div.className = "card";
-      if (shouldHide) {
-        div.classList.add("card-back");
-      } else {
-        styleCardDiv(div, card);
-        if (!turnFinished && isCurrent) {
-          div.onclick = () => handleCardPlay(i, cardIndex);
-        }
-      }
-      handEl.appendChild(div);
-    });
-  });
-  renderPlayerLabels();
-}
-
-function renderPlayerLabels() {
-  for (let i = 0; i < 4; i++) {
-    const labelSlot = document.getElementById(`label-slot-${i}`);
-    const labelSpan = document.getElementById(`playerLabel${i}`);
-    const countSpan = document.getElementById(`cardCount${i}`);
-    const shieldSpan = document.getElementById(`shield${i}`);
-
-    // Hide everything for players beyond numPlayers
-    if (i >= numPlayers) {
-      if (labelSlot) labelSlot.style.display = "none";
-      if (labelSpan) labelSpan.style.display = "none";
-      if (countSpan) countSpan.style.display = "none";
-      if (shieldSpan) shieldSpan.style.display = "none";
-      continue;
-    }
-
-    // Show label slot
-    if (labelSlot) labelSlot.style.display = "";
-
-    const playerIndex = (i + state.turn) % state.hands.length;
-
-    if (labelSpan) {
-      labelSpan.style.display = "";
-      labelSpan.textContent = `Player ${playerIndex + 1}${playerIndex === aiPlayerIndex ? " (AI)" : ""}`;
-    }
-
-    if (countSpan) {
-      countSpan.style.display = "";
-      countSpan.textContent = state.hands[playerIndex]?.length ?? 0;
-    }
-
-    if (shieldSpan) {
-      shieldSpan.style.display = state.protectedPlayers.has(playerIndex) ? "inline" : "none";
-    }
-  }
-}
-
-
-
-
-
-
-
-function handleCardPlay(playerIndex, cardIndex) {
-  const card = state.hands[playerIndex][cardIndex];
-  if (!UNOLogic.isValidPlay(card, state.currentCard)) return;
-
-  let newHands = state.hands.map((hand, i) =>
-    i === playerIndex ? hand.filter((_, j) => j !== cardIndex) : hand
-  );
-
-  let nextState = {
-    ...state,
-    hands: newHands,
-    currentCard: { ...card }
-  };
-
-  const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
-
-  switch (card.type) {
-    case "+2":
-      nextState.hands = applyDraws(nextState.hands, next, 2);
-      break;
-    case "+4":
-      nextState.hands = applyDraws(nextState.hands, next, 4);
-      nextState.pendingColorChange = true;
-      handleColorSelection(card, nextState);
-      return;
-    case "Reverse":
-      nextState.direction *= -1;
-      break;
-    case "Skip":
-      nextState.skipNext = true;
-      nextState.lastSkipped = next;
-      break;
-  }
-
-  finalisePlayAndAdvance(nextState);
-}
-
-function applyDraws(hands, player, count) {
-  let updated = hands;
-  for (let i = 0; i < count; i++) {
-    updated = updated.map((hand, idx) =>
-      idx === player ? UNOLogic.drawCard(hand) : hand
-    );
-  }
-  return updated;
-}
-
-function handleColorSelection(card, nextState) {
-  chooseColorViaPopup().then((selectedColor) => {
-    card.color = selectedColor;
-    finalisePlayAndAdvance({
-      ...nextState,
-      currentCard: card,
-      pendingColorChange: false
-    });
-  });
-}
-
-
-
-
-function finalisePlayAndAdvance(newState) {
-  turnFinished = true;
-  state = newState;
-  updateDirectionArrows();
-  render_current_card();
-  renderAllHands();
-  disableCurrentPlayerHand();
-  if (state.hands[state.turn].length === 0) {
-    showEndGameDialog(state.turn);
-    return;
-  }
-
-  const currentPlayer = state.turn;
-  const remainingCards = state.hands[currentPlayer].length;
-  const isPlayer = currentPlayer !== aiPlayerIndex;
-
-  const waitForUnoTime = (remainingCards === 1 && isPlayer) ? 2000 : 0;
-
-  setTimeout(() => {
-    showTurnSummary(state.currentCard);
-
-    setTimeout(() => {
-      state = advanceTurn(state);
-      turnFinished = false;
-
-      if (state.turn === aiPlayerIndex) {
-        setTimeout(aiPlayTurn, 600);
-      } else {
-        showTurnPopup();
-      }
-    }, 1500); // after summary is shown
-  }, waitForUnoTime);
-}
-
-
-
-function disableCurrentPlayerHand() {
-  const handEl = el(`hand-${rotateIndex(state.turn)}`);
-  if (handEl) {
-    handEl.querySelectorAll(".card").forEach(div => {
-      div.className = "card card-back";
-      div.textContent = "";
-    });
-  }
+function styleCardDiv(div, card) {
+  const { bgColor, label } = UNOLogic.getCardStyle(card);
+  div.className = `card ${bgColor}`;
+  div.textContent = label;
 }
 
 function chooseColorViaPopup() {
@@ -333,29 +91,20 @@ function chooseColorViaPopup() {
   });
 }
 
-function render_current_card() {
-  styleCardDiv(currentCardDiv, state.currentCard);
-}
-
-function styleCardDiv(div, card) {
-  const { bgColor, label } = UNOLogic.getCardStyle(card);
-  div.className = `card ${bgColor}`;
-  div.textContent = label;
+function disableCurrentPlayerHand() {
+  const handEl = el(`hand-${rotateIndex(state.turn)}`);
+  if (handEl) {
+    handEl.querySelectorAll(".card").forEach(div => {
+      div.className = "card card-back";
+      div.textContent = "";
+    });
+  }
 }
 
 function showTurnPopup() {
   turnPopupText.textContent = `Player ${state.turn + 1}'s Turn`;
   turnPopup.showModal();
 }
-
-function updateDirectionArrows() {
-  const arrowsDiv = document.getElementById("directionArrows");
-  if (!arrowsDiv) return;
-
-  // Set the data-direction attribute based on state.direction
-  arrowsDiv.setAttribute("data-direction", state.direction);
-}
-
 
 function showTurnSummary(card) {
   const summary = document.createElement("div");
@@ -382,6 +131,135 @@ function showTurnSummary(card) {
   setTimeout(() => summary.remove(), 1300);
 }
 
+function updateDirectionArrows() {
+  const arrowsDiv = el("directionArrows");
+  if (arrowsDiv) arrowsDiv.setAttribute("data-direction", state.direction);
+}
+
+function showEndGameDialog(winnerIndex) {
+  const modal = el("endGameModal");
+  const winnerText = el("winnerText");
+  const isAI = winnerIndex === aiPlayerIndex;
+  winnerText.textContent = `🎉 ${isAI ? "AI" : "Player " + (winnerIndex + 1)} wins! Well done!`;
+  modal.showModal();
+}
+
+function render_current_card() {
+  styleCardDiv(currentCardDiv, state.currentCard);
+}
+
+function renderAllHands() {
+  state.hands.forEach((hand, i) => {
+    if (i >= numPlayers) return;
+    const rotated = rotateIndex(i);
+    const handEl = el(`hand-${rotated}`);
+    const playerEl = el(`player-${rotated}`);
+    if (!handEl || !playerEl) return;
+
+    playerEl.className = "player";
+    playerEl.classList.add(["player-bottom", "player-left", "player-top", "player-right"][rotated]);
+
+    const labelEl = el(`playerLabel${i}`);
+    if (labelEl) labelEl.textContent = `Player ${i + 1}${i === aiPlayerIndex ? " (AI)" : ""}`;
+
+    const countEl = el(`cardCount${i}`);
+    if (countEl) countEl.textContent = hand.length;
+
+    const isCurrent = i === state.turn;
+    const isAI = i === aiPlayerIndex;
+    const shouldHide = (isAI && !el("showAIHand").checked) || (!isAI && !isCurrent);
+
+    handEl.innerHTML = "";
+    hand.forEach((card, cardIndex) => {
+      const div = document.createElement("div");
+      div.className = "card";
+      if (shouldHide) {
+        div.classList.add("card-back");
+      } else {
+        styleCardDiv(div, card);
+        if (!turnFinished && isCurrent) div.onclick = () => handleCardPlay(i, cardIndex);
+      }
+      handEl.appendChild(div);
+    });
+  });
+}
+
+
+
+function handleCardPlay(playerIndex, cardIndex) {
+  const card = state.hands[playerIndex][cardIndex];
+  if (!UNOLogic.isValidPlay(card, state.currentCard)) return;
+
+  let newHands = state.hands.map((hand, i) =>
+    i === playerIndex ? hand.filter((_, j) => j !== cardIndex) : hand
+  );
+
+  let nextState = {
+    ...state,
+    hands: newHands,
+    currentCard: { ...card }
+  };
+
+  const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
+
+  switch (card.type) {
+    case "+2":
+      nextState.hands = applyDraws(nextState.hands, next, 2);
+      break;
+    case "+4":
+      nextState.hands = applyDraws(nextState.hands, next, 4);
+      nextState.pendingColorChange = true;
+      return handleColorSelection(card, nextState);
+    case "Reverse":
+      nextState.direction *= -1;
+      break;
+    case "Skip":
+      nextState.skipNext = true;
+      nextState.lastSkipped = next;
+      break;
+  }
+
+  finalisePlayAndAdvance(nextState);
+}
+
+function applyDraws(hands, player, count) {
+  return R.times(() => UNOLogic.drawCard, count).reduce((acc, drawFn) => drawFn(acc), hands);
+}
+
+function handleColorSelection(card, nextState) {
+  chooseColorViaPopup().then((selectedColor) => {
+    card.color = selectedColor;
+    finalisePlayAndAdvance({
+      ...nextState,
+      currentCard: card,
+      pendingColorChange: false
+    });
+  });
+}
+
+function finalisePlayAndAdvance(newState) {
+  turnFinished = true;
+  state = newState;
+  updateDirectionArrows();
+  render_current_card();
+  renderAllHands();
+  disableCurrentPlayerHand();
+  if (state.hands[state.turn].length === 0) return showEndGameDialog(state.turn);
+
+  const currentPlayer = state.turn;
+  const waitForUnoTime = (state.hands[currentPlayer].length === 1 && currentPlayer !== aiPlayerIndex) ? 2000 : 0;
+
+  setTimeout(() => {
+    showTurnSummary(state.currentCard);
+    setTimeout(() => {
+      state = advanceTurn(state);
+      turnFinished = false;
+      if (state.turn === aiPlayerIndex) setTimeout(aiPlayTurn, 600);
+      else showTurnPopup();
+    }, 1500);
+  }, waitForUnoTime);
+}
+
 function aiPlayTurn() {
   const result = UNOLogic.performAITurn(
     aiPlayerIndex,
@@ -398,13 +276,12 @@ function aiPlayTurn() {
     direction: result.direction,
     skipNext: result.skipNext
   };
-  const aiHand = state.hands[aiPlayerIndex];
-  if (aiHand.length === 1 && Math.random() < 0.8) {
-    state.protectedPlayers.add(aiPlayerIndex); // AI declares UNO
-    renderPlayerLabels(); // show shield
+
+  if (state.hands[aiPlayerIndex].length === 1 && Math.random() < 0.8) {
+    state.protectedPlayers.add(aiPlayerIndex);
   }
 
-  updateDirectionArrows(); 
+  updateDirectionArrows();
   turnFinished = true;
   render_current_card();
   renderAllHands();
@@ -414,17 +291,42 @@ function aiPlayTurn() {
     state = advanceTurn(state);
     turnFinished = false;
     showTurnPopup();
-    if (state.turn === aiPlayerIndex) {
-      setTimeout(aiPlayTurn, 600);
-    }
+    if (state.turn === aiPlayerIndex) setTimeout(aiPlayTurn, 600);
   }, 1500);
 }
+function initGame() {
+  el("setupModal").showModal();
+  el("startGame").onclick = () => {
+    numPlayers = parseInt(el("numPlayersInput").value) || 2;
+    aiPlayerIndex = el("vsAI").checked ? 1 : null;
+    state = createInitialState();
+    setupModal.close();
+    renderAllHands();
+    showTurnPopup();
+    updateDirectionArrows();
+  };
+}
+
+beginTurnButton.onclick = () => {
+  turnPopup.close();
+  render_current_card();
+  renderAllHands();
+};
+
+drawButton.onclick = () => {
+  if (!turnFinished) {
+    state = {
+      ...state,
+      hands: drawCardForPlayer(state.turn, state.hands)
+    };
+    renderAllHands();
+  }
+};
 
 el("unoButton").onclick = () => {
   const currentHand = state.hands[state.turn];
   if (UNOLogic.declareUno(state.turn, state.hands, state.protectedPlayers)) {
-    const shieldSpan = document.getElementById(`shield${state.turn}`);
-    if (shieldSpan) shieldSpan.style.display = "inline";
+    el(`shield${state.turn}`).style.display = "inline";
     return;
   }
 
@@ -438,18 +340,13 @@ el("unoButton").onclick = () => {
     alert("False UNO! You get 2 penalty cards.");
     state.hands[state.turn] = UNOLogic.drawCard(UNOLogic.drawCard(currentHand));
   }
-
   renderAllHands();
 };
 
-function showEndGameDialog(winnerIndex) {
-  const modal = el("endGameModal");
-  const winnerText = el("winnerText");
-  const isAI = winnerIndex === aiPlayerIndex;
-
-  winnerText.textContent = `🎉 ${isAI ? "AI" : "Player " + (winnerIndex + 1)} wins! Well done!`;
-  modal.showModal();
-}
+// Ensure game initializes after DOM is fully ready
+document.addEventListener("DOMContentLoaded", () => {
+  initGame();
+});
 
 
 export default Object.freeze({});

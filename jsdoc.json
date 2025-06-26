@@ -4,7 +4,8 @@
     },
     "source": {
         "include": [
-            "web-app/uno.js"
+            "web-app/uno.js",
+            "web-app/uno-logic.js"
         ],
         "includePattern": "\\.js$",
         "excludePattern": "(node_modules/|docs)"
