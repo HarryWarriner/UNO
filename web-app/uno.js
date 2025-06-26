@@ -168,7 +168,7 @@ function handleCardPlay(playerIndex, cardIndex) {
     case "+4":
       nextState.hands = applyDraws(nextState.hands, next, 4);
       nextState.pendingColorChange = true;
-      handleColorSelection(card);
+      handleColorSelection(card, nextState);
       return;
     case "Reverse":
       nextState.direction *= -1;
@@ -192,15 +192,19 @@ function applyDraws(hands, player, count) {
   return updated;
 }
 
-function handleColorSelection(card) {
+function handleColorSelection(card, nextState) {
   chooseColorViaPopup().then((selectedColor) => {
-    state.currentCard.color = selectedColor;
+    card.color = selectedColor;
     finalisePlayAndAdvance({
-      ...state,
+      ...nextState,
+      currentCard: card,
       pendingColorChange: false
     });
   });
 }
+
+
+
 
 function finalisePlayAndAdvance(newState) {
   turnFinished = true;

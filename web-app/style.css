@@ -1,3 +1,7 @@
+:root{
+    --card-height:105px;
+}
+
 body {
   margin: 0;
   background: #005;
@@ -51,10 +55,7 @@ body {
   top: 50%;
   transform: translateY(-50%);
 }
-.player-left .hand-container {
-  transform: rotate(90deg);
-  transform-origin: center;
-}
+
 
 /* Right Player */
 .player-right {
@@ -62,10 +63,57 @@ body {
   top: 50%;
   transform: translateY(-50%);
 }
+
+.player-left .hand-container,
 .player-right .hand-container {
-  transform: rotate(-90deg);
-  transform-origin: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
+.player-left .hand {
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  margin-left: 10px;
+}
+
+.player-right .hand {
+  flex-direction: column;
+  align-items: flex-start;
+  margin-right: 10px;
+}
+
+/* LEFT player: rotate cards and label clockwise */
+.player-left .hand .card {
+  transform: rotate(90deg);
+  margin: -60px 0 0 0;
+}
+
+/* RIGHT player: rotate cards and label counter-clockwise */
+.player-right .hand .card {
+  transform: rotate(-90deg);
+  margin: -60px 0 0 0;
+}
+
+.player-left .label {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--card-height) + 5px);
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: center;
+  white-space: nowrap;
+}
+
+.player-right .label {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--card-height) + 5px);
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: center;
+  white-space: nowrap;
+}
+
+
 
 /* Player Labels */
 .label {
@@ -83,8 +131,8 @@ body {
 
 /* Cards inside hands */
 .card {
-  width: 60px;
-  height: 90px;
+  aspect-ratio: 2/ 3;
+  height: var(--card-height);
   border-radius: 8px;
   font-size: 24px;
   font-weight: bold;
@@ -96,7 +144,7 @@ body {
   transition: transform 0.2s ease;
 }
 
-/* Only hand cards should overlap */
+/* Hand cards should overlap */
 .hand .card {
   margin-left: -10px;
   z-index: 1;
@@ -106,6 +154,17 @@ body {
 .hand .card:hover {
   transform: translateY(-10px);
   z-index: 10;
+}
+
+/* Side Cards shouldn't hover */
+.player-left .hand .card:hover,
+.player-right .hand .card:hover {
+  transform: rotate(90deg) !important;
+  z-index: 1 !important;
+}
+
+.player-right .hand .card:hover {
+  transform: rotate(-90deg) !important;
 }
 
 
@@ -240,20 +299,7 @@ dialog::backdrop {
 .center-stack {
   gap: 20px;
 }
- .direction-arrows[data-direction="-1"] {
-      --radius: 10vw;
-      position: absolute;
-      width: 12vw;
-      height: 12vw;
-      top: 0%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 1;
-    }
-     .direction-arrows[data-direction="1"] {
+  .direction-arrows {
       --radius: 10vw;
       position: absolute;
       width: 12vw;
@@ -264,7 +310,7 @@ dialog::backdrop {
       border-radius: 50%;
       z-index: 0;
       pointer-events: none;
-      opacity: 1;
+      opacity: 0.5;
     }
 
     .direction-arrows .arrow {
@@ -272,32 +318,30 @@ dialog::backdrop {
       top: 50%;
       left: 50%;
       font-size: 2.5vw;
-      color: black;
+      color: white;
       transform-origin: center;
     }
 
-    /* Clockwise (data-direction="1") */
-    .direction-arrows[data-direction="1"] .arrow:nth-child(1) {
+    /* Arrow positions (static angles) */
+    .direction-arrows .arrow:nth-child(1) {
       transform: rotate(0deg) translateY(calc(-1 * var(--radius)));
     }
 
-    .direction-arrows[data-direction="1"] .arrow:nth-child(2) {
+    .direction-arrows .arrow:nth-child(2) {
       transform: rotate(120deg) translateY(calc(-1 * var(--radius)));
     }
 
-    .direction-arrows[data-direction="1"] .arrow:nth-child(3) {
+    .direction-arrows .arrow:nth-child(3) {
       transform: rotate(240deg) translateY(calc(-1 * var(--radius)));
     }
 
-    /* Counterclockwise (data-direction="-1") */
-    .direction-arrows[data-direction="-1"] .arrow:nth-child(1) {
-      transform: rotate(180deg) translateY(calc(-1 * var(--radius)));
+    /* Flip arrows based on direction */
+    #directionArrows[data-direction="-1"] .arrow {
+      transform: scaleX(-1) rotate(0deg) translateY(calc(-1 * var(--radius)));
     }
-
-    .direction-arrows[data-direction="-1"] .arrow:nth-child(2) {
-      transform: rotate(-300deg) translateY(calc(-1 * var(--radius)));
+    #directionArrows[data-direction="-1"] .arrow:nth-child(2) {
+      transform: scaleX(-1) rotate(120deg) translateY(calc(-1 * var(--radius)));
     }
-
-    .direction-arrows[data-direction="-1"] .arrow:nth-child(3) {
-      transform: rotate(-60deg) translateY(calc(-1 * var(--radius)));
+    #directionArrows[data-direction="-1"] .arrow:nth-child(3) {
+      transform: scaleX(-1) rotate(240deg) translateY(calc(-1 * var(--radius)));
     }
