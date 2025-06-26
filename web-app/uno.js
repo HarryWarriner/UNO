@@ -80,7 +80,12 @@ document.addEventListener("DOMContentLoaded", () => {
     state = createInitialState();
     turnFinished = false;
     setupModal.close();
+    for (let i = numPlayers; i < 4; i++) {
+      const playerEl = el(`player-${i}`);
+      if (playerEl) playerEl.style.display = "none";
+    }
     showTurnPopup();
+    updateDirectionArrows();
   };
 });
 
@@ -200,6 +205,7 @@ function handleColorSelection(card) {
 function finalisePlayAndAdvance(newState) {
   turnFinished = true;
   state = newState;
+  updateDirectionArrows();
   render_current_card();
   renderAllHands();
   disableCurrentPlayerHand();
@@ -256,6 +262,15 @@ function showTurnPopup() {
   turnPopup.showModal();
 }
 
+function updateDirectionArrows() {
+  const arrowsDiv = document.getElementById("directionArrows");
+  if (!arrowsDiv) return;
+
+  // Set the data-direction attribute based on state.direction
+  arrowsDiv.setAttribute("data-direction", state.direction);
+}
+
+
 function showTurnSummary(card) {
   const summary = document.createElement("div");
   summary.textContent = UNOLogic.generateTurnSummary(
@@ -298,6 +313,7 @@ function aiPlayTurn() {
     skipNext: result.skipNext
   };
 
+  updateDirectionArrows(); 
   turnFinished = true;
   render_current_card();
   renderAllHands();

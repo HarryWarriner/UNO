@@ -240,8 +240,21 @@ dialog::backdrop {
 .center-stack {
   gap: 20px;
 }
-.direction-arrows {
-      --radius: 10vw; /* Adjustable radius */
+ .direction-arrows[data-direction="-1"] {
+      --radius: 10vw;
+      position: absolute;
+      width: 12vw;
+      height: 12vw;
+      top: 0%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 1;
+    }
+     .direction-arrows[data-direction="1"] {
+      --radius: 10vw;
       position: absolute;
       width: 12vw;
       height: 12vw;
@@ -251,7 +264,7 @@ dialog::backdrop {
       border-radius: 50%;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.3;
+      opacity: 1;
     }
 
     .direction-arrows .arrow {
@@ -259,20 +272,32 @@ dialog::backdrop {
       top: 50%;
       left: 50%;
       font-size: 2.5vw;
-      color: blwhiteack;
+      color: black;
       transform-origin: center;
     }
 
-    .direction-arrows .arrow:nth-child(1) {
-      transform: rotate(0deg) translateY(calc(-1 * var(--radius))) ;
+    /* Clockwise (data-direction="1") */
+    .direction-arrows[data-direction="1"] .arrow:nth-child(1) {
+      transform: rotate(0deg) translateY(calc(-1 * var(--radius)));
     }
 
-    /* Arrow at 120° */
-    .direction-arrows .arrow:nth-child(2) {
+    .direction-arrows[data-direction="1"] .arrow:nth-child(2) {
       transform: rotate(120deg) translateY(calc(-1 * var(--radius)));
     }
 
-    /* Arrow at 240° */
-    .direction-arrows .arrow:nth-child(3) {
+    .direction-arrows[data-direction="1"] .arrow:nth-child(3) {
       transform: rotate(240deg) translateY(calc(-1 * var(--radius)));
+    }
+
+    /* Counterclockwise (data-direction="-1") */
+    .direction-arrows[data-direction="-1"] .arrow:nth-child(1) {
+      transform: rotate(180deg) translateY(calc(-1 * var(--radius)));
+    }
+
+    .direction-arrows[data-direction="-1"] .arrow:nth-child(2) {
+      transform: rotate(-300deg) translateY(calc(-1 * var(--radius)));
+    }
+
+    .direction-arrows[data-direction="-1"] .arrow:nth-child(3) {
+      transform: rotate(-60deg) translateY(calc(-1 * var(--radius)));
     }
