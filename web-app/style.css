@@ -1,5 +1,6 @@
 :root{
     --card-height:105px;
+    --radius: 150px;
 }
 
 body {
@@ -75,12 +76,18 @@ body {
   flex-direction: column-reverse;
   align-items: flex-end;
   margin-left: 10px;
+  flex-wrap: wrap;
+  max-height: 80vh;
+  justify-content: center;
 }
 
 .player-right .hand {
   flex-direction: column;
   align-items: flex-start;
   margin-right: 10px;
+  flex-wrap: wrap;
+  max-height: 80vh;
+  justify-content: center;
 }
 
 /* LEFT player: rotate cards and label clockwise */
@@ -125,8 +132,12 @@ body {
 /* Hands */
 .hand {
   display: flex;
-  gap: 5px;
+  flex-wrap: wrap;
+  
   position: relative;
+  justify-content: center;
+  max-width: 150vw;
+  gap: 0;
 }
 
 /* Cards inside hands */
@@ -147,6 +158,7 @@ body {
 /* Hand cards should overlap */
 .hand .card {
   margin-left: -10px;
+  margin-top: -20px;
   z-index: 1;
 }
 
@@ -300,10 +312,9 @@ dialog::backdrop {
   gap: 20px;
 }
   .direction-arrows {
-      --radius: 10vw;
       position: absolute;
-      width: 12vw;
-      height: 12vw;
+      width: 120px;
+      height: 120px;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -317,7 +328,7 @@ dialog::backdrop {
       position: absolute;
       top: 50%;
       left: 50%;
-      font-size: 2.5vw;
+      font-size: 35px;
       color: white;
       transform-origin: center;
     }
@@ -336,12 +347,12 @@ dialog::backdrop {
     }
 
     /* Flip arrows based on direction */
-    #directionArrows[data-direction="-1"] .arrow {
+    #directionArrows[data-direction="1"] .arrow {
       transform: scaleX(-1) rotate(0deg) translateY(calc(-1 * var(--radius)));
     }
-    #directionArrows[data-direction="-1"] .arrow:nth-child(2) {
+    #directionArrows[data-direction="1"] .arrow:nth-child(2) {
       transform: scaleX(-1) rotate(120deg) translateY(calc(-1 * var(--radius)));
     }
-    #directionArrows[data-direction="-1"] .arrow:nth-child(3) {
+    #directionArrows[data-direction="1"] .arrow:nth-child(3) {
       transform: scaleX(-1) rotate(240deg) translateY(calc(-1 * var(--radius)));
     }

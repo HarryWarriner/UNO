@@ -27,11 +27,7 @@ const turnPopupText = el("turnPopupText");
 const beginTurnButton = el("beginTurnButton");
 const colorSelectModal = el("colorSelectModal");
 const colorButtons = colorSelectModal.querySelectorAll(".color-option");
-const drawButton = document.createElement("button");
-drawButton.id = "drawButton";
-drawButton.textContent = "Draw Card";
-drawButton.className = "buttoncss draw-button";
-document.body.appendChild(drawButton);
+const drawButton = el("drawButton")
 
 // Game State
 let aiPlayerIndex = null;
