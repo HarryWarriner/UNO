@@ -1,31 +1,35 @@
 /**
- * @module uno-logic
+ * @file uno-logic.js
+ * @description Core functional logic for the UNO game, including turn management, AI, and card validation.
  * @namespace UNOLogic
- * @description Functional UNO game logic core.
- * @author Harry
+ * @author Harry Warriner
  * @version 2025
  */
 
 import * as R from "./ramda.js";
 
+const UNOLogic = Object.create(null);
+
 /**
  * @typedef {Object} Card
- * @property {string} color - "Red", "Green", "Blue", or "Yellow" (or undefined for Wild)
+ * @memberof UNOLogic
  * @property {string} value - "1"–"9", "+2", "+4", "Skip", "Reverse"
+ * @property {string} [color] - "Red", "Green", "Blue", or "Yellow" (undefined for Wild cards)
  */
 
-/** @constant {string[]} */
+/** @constant {string[]} COLORS - Valid UNO card colors */
 export const COLORS = Object.freeze(["Red", "Green", "Blue", "Yellow"]);
 
-/** @constant {string[]} */
+/** @constant {string[]} SPECIAL_VALUES - Valid special card types @private */
 const SPECIAL_VALUES = Object.freeze(["+2", "+4", "Skip", "Reverse"]);
 
-/** @constant {string[]} */
+/** @constant {string[]} NUMBER_VALUES - Valid number card values @private */
 const NUMBER_VALUES = R.map(String, R.range(1, 10));
 
 /**
- * Create a random card.
- * @returns {Card}
+ * Create a random UNO card.
+ * @memberof UNOLogic
+ * @returns {Card} A randomly generated UNO card.
  * @pure
  */
 export const getRandomCard = () => {
@@ -40,34 +44,39 @@ export const getRandomCard = () => {
 };
 
 /**
- * Generate a hand of n cards.
- * @param {number} n
- * @returns {Card[]}
+ * Generate a hand of random UNO cards.
+ * @memberof UNOLogic
+ * @param {number} n Number of cards in the hand.
+ * @returns {UNOLogic.Card[]} A list of randomly generated cards.
+ * @private
  * @pure
  */
 const generateHand = (n) => R.times(getRandomCard, n);
 
 /**
  * Deal hands to players.
- * @param {number} numPlayers
- * @returns {Card[][]}
+ * @memberof UNOLogic
+ * @param {number} numPlayers Total number of players.
+ * @returns {UNOLogic.Card[][]} A 2D array of cards, one hand per player.
  * @pure
  */
 export const dealHands = (numPlayers) => R.times(() => generateHand(7), numPlayers);
 
 /**
- * Draw a card for a hand.
- * @param {Card[]} hand
- * @returns {Card[]}
+ * Draw one card and append it to the given hand.
+ * @memberof UNOLogic
+ * @param {UNOLogic.Card[]} hand The player's current hand.
+ * @returns {UNOLogic.Card[]} A new hand with an additional card.
  * @pure
  */
 export const drawCard = (hand) => R.append(getRandomCard(), hand);
 
 /**
- * Check if a card is playable.
- * @param {Card} card
- * @param {Card} currentCard
- * @returns {boolean}
+ * Check if a given card is playable against the current card.
+ * @memberof UNOLogic
+ * @param {UNOLogic.Card} card The card to be played.
+ * @param {UNOLogic.Card} currentCard The card currently on the pile.
+ * @returns {boolean} True if the play is valid.
  * @pure
  */
 export const isValidPlay = (card, currentCard) =>
@@ -76,22 +85,24 @@ export const isValidPlay = (card, currentCard) =>
   card.value === currentCard.value;
 
 /**
- * Get next player index.
- * @param {number} current
- * @param {number} total
- * @param {number} dir
- * @returns {number}
+ * Get the index of the next player.
+ * @memberof UNOLogic
+ * @param {number} current Index of current player.
+ * @param {number} total Total number of players.
+ * @param {number} dir Direction of play (1 or -1).
+ * @returns {number} Index of the next player.
  * @pure
  */
 export const nextTurn = (current, total, dir = 1) =>
   (current + dir + total) % total;
 
 /**
- * Protect player when declaring UNO.
- * @param {number} index
- * @param {Card[][]} hands
- * @param {Set<number>} protectedSet
- * @returns {boolean}
+ * Declare UNO for a player.
+ * @memberof UNOLogic
+ * @param {number} index Index of the declaring player.
+ * @param {UNOLogic.Card[][]} hands All player hands.
+ * @param {Set<number>} protectedSet Set of protected players.
+ * @returns {boolean} Whether the declaration was valid.
  * @pure
  */
 export const declareUno = (index, hands, protectedSet) => {
@@ -103,11 +114,12 @@ export const declareUno = (index, hands, protectedSet) => {
 };
 
 /**
- * Call out other players who failed to say UNO.
- * @param {number} caller
- * @param {Card[][]} hands
- * @param {Set<number>} protectedSet
- * @returns {{ caught: boolean, punishedPlayers: number[] }}
+ * Attempt to call UNO on opponents.
+ * @memberof UNOLogic
+ * @param {number} caller Index of calling player.
+ * @param {UNOLogic.Card[][]} hands All player hands.
+ * @param {Set<number>} protectedSet Set of protected players.
+ * @returns {{ caught: boolean, punishedPlayers: number[] }} Result of the call.
  * @pure
  */
 export const callUno = (caller, hands, protectedSet) => {
@@ -123,9 +135,10 @@ export const callUno = (caller, hands, protectedSet) => {
 };
 
 /**
- * Return styling for a card.
- * @param {Card} card
- * @returns {{ bgColor: string, label: string }}
+ * Get CSS class and label for a card.
+ * @memberof UNOLogic
+ * @param {UNOLogic.Card} card The card to style.
+ * @returns {{ bgColor: string, label: string }} CSS and label info.
  * @pure
  */
 export const getCardStyle = (card) => {
@@ -143,13 +156,14 @@ export const getCardStyle = (card) => {
 };
 
 /**
- * Generate human-readable turn summary.
- * @param {number} turn
- * @param {number} num
- * @param {number} dir
- * @param {Card} card
- * @param {string} currentColor
- * @returns {string}
+ * Generate a summary of the last turn.
+ * @memberof UNOLogic
+ * @param {number} turn The player who just played.
+ * @param {number} num Total number of players.
+ * @param {number} dir Game direction.
+ * @param {UNOLogic.Card} card The card played.
+ * @param {string} currentColor Current color in play.
+ * @returns {string} Summary string.
  * @pure
  */
 export const generateTurnSummary = (turn, num, dir, card, currentColor) => {
@@ -166,13 +180,14 @@ export const generateTurnSummary = (turn, num, dir, card, currentColor) => {
 };
 
 /**
- * Perform AI turn.
- * @param {number} aiIndex
- * @param {Card[][]} hands
- * @param {Card} currentCard
- * @param {number} dir
- * @param {number} numPlayers
- * @returns {{ updatedHands: Card[][], newCard: Card, direction: number, skipNext: boolean }}
+ * Perform an AI player's turn.
+ * @memberof UNOLogic
+ * @param {number} aiIndex Index of the AI player.
+ * @param {UNOLogic.Card[][]} hands All player hands.
+ * @param {UNOLogic.Card} currentCard Current card in play.
+ * @param {number} dir Current direction.
+ * @param {number} numPlayers Total number of players.
+ * @returns {{ updatedHands: UNOLogic.Card[][], newCard: UNOLogic.Card, direction: number, skipNext: boolean }} Result of AI move.
  * @pure
  */
 export const performAITurn = (aiIndex, hands, currentCard, dir, numPlayers) => {

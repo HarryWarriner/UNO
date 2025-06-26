@@ -1,20 +1,27 @@
 /**
+ * @file uno.js
+ * @description UNO UI and DOM controller module. Handles rendering, event interaction, and user interface logic
+ * for a functional UNO game built on top of the core game logic in {@link module:uno-logic}.
  * @namespace UNO
- * @description Main UNO game logic and UI handler.
+ * @author Harry Warriner
+ * @version 2025
+ * @see {@link https://en.wikipedia.org/wiki/Uno_(card_game) | UNO on Wikipedia}
  */
 
 import * as UNOLogic from "./uno-logic.js";
 
 /**
  * @typedef {Object} GameState
- * @property {Card} currentCard
- * @property {Card[][]} hands
- * @property {number} turn
- * @property {number} direction
- * @property {boolean} skipNext
- * @property {Set<number>} protectedPlayers
- * @property {number|null} lastSkipped
- * @property {boolean} [pendingColorChange]
+ * @memberof UNO
+ * @description Represents the full state of a UNO game at any moment.
+ * @property {UNOLogic.Card} currentCard The card currently in play.
+ * @property {UNOLogic.Card[][]} hands An array of hands, one per player.
+ * @property {number} turn Index of the current player's turn.
+ * @property {number} direction Game direction: `1` for clockwise, `-1` for counter-clockwise.
+ * @property {boolean} skipNext Whether the next player is to be skipped.
+ * @property {Set<number>} protectedPlayers Indices of players who are safe from being called out for UNO.
+ * @property {number|null} lastSkipped Index of last player skipped due to a Skip or Draw effect.
+ * @property {boolean} [pendingColorChange] Whether a Wild Draw 4 is awaiting a chosen color.
  */
 
 const el = (id) => document.getElementById(id);
@@ -33,6 +40,11 @@ let numPlayers = 2;
 let state = createInitialState();
 let turnFinished = false;
 
+/**
+ * @memberof UNO
+ * Create the initial game state with a valid starting card.
+ * @returns {GameState} The starting state of the game.
+ */
 function createInitialState() {
   let card;
   do {
@@ -50,6 +62,12 @@ function createInitialState() {
   };
 }
 
+/**
+ * Advance the turn to the next player.
+ * @memberof UNO
+ * @param {GameState} prevState The previous game state.
+ * @returns {GameState} The updated game state with new turn.
+ */
 function advanceTurn(prevState) {
   const skip = prevState.skipNext ? 2 : 1;
   const nextTurn = (prevState.turn + skip * prevState.direction + prevState.hands.length) % prevState.hands.length;
@@ -64,34 +82,29 @@ function advanceTurn(prevState) {
   };
 }
 
-function rotateIndex(i) {
-  return (i - state.turn + state.hands.length) % state.hands.length;
-}
+const rotateIndex = (i) => (i - state.turn + state.hands.length) % state.hands.length;
 
-function drawCardForPlayer(playerIndex, hands) {
-  return hands.map((hand, i) => i === playerIndex ? UNOLogic.drawCard(hand) : hand);
-}
+const drawCardForPlayer = (playerIndex, hands) =>
+  hands.map((hand, i) => i === playerIndex ? UNOLogic.drawCard(hand) : hand);
 
-function styleCardDiv(div, card) {
+const styleCardDiv = (div, card) => {
   const { bgColor, label } = UNOLogic.getCardStyle(card);
   div.className = `card ${bgColor}`;
   div.textContent = label;
-}
+};
 
-function chooseColorViaPopup() {
-  return new Promise((resolve) => {
-    colorSelectModal.showModal();
-    colorButtons.forEach(btn => {
-      btn.onclick = () => {
-        const color = btn.dataset.color;
-        colorSelectModal.close();
-        resolve(color);
-      };
-    });
+const chooseColorViaPopup = () => new Promise((resolve) => {
+  colorSelectModal.showModal();
+  colorButtons.forEach(btn => {
+    btn.onclick = () => {
+      const color = btn.dataset.color;
+      colorSelectModal.close();
+      resolve(color);
+    };
   });
-}
+});
 
-function disableCurrentPlayerHand() {
+const disableCurrentPlayerHand = () => {
   const handEl = el(`hand-${rotateIndex(state.turn)}`);
   if (handEl) {
     handEl.querySelectorAll(".card").forEach(div => {
@@ -99,14 +112,14 @@ function disableCurrentPlayerHand() {
       div.textContent = "";
     });
   }
-}
+};
 
-function showTurnPopup() {
+const showTurnPopup = () => {
   turnPopupText.textContent = `Player ${state.turn + 1}'s Turn`;
   turnPopup.showModal();
-}
+};
 
-function showTurnSummary(card) {
+const showTurnSummary = (card) => {
   const summary = document.createElement("div");
   summary.textContent = UNOLogic.generateTurnSummary(
     state.turn,
@@ -129,13 +142,18 @@ function showTurnSummary(card) {
   });
   document.body.appendChild(summary);
   setTimeout(() => summary.remove(), 1300);
-}
+};
 
-function updateDirectionArrows() {
+const updateDirectionArrows = () => {
   const arrowsDiv = el("directionArrows");
   if (arrowsDiv) arrowsDiv.setAttribute("data-direction", state.direction);
-}
+};
 
+/**
+ * @memberof UNO
+ * Show the game over modal dialog.
+ * @param {number} winnerIndex Index of the winning player.
+ */
 function showEndGameDialog(winnerIndex) {
   const modal = el("endGameModal");
   const winnerText = el("winnerText");
@@ -144,10 +162,11 @@ function showEndGameDialog(winnerIndex) {
   modal.showModal();
 }
 
-function render_current_card() {
-  styleCardDiv(currentCardDiv, state.currentCard);
-}
+const render_current_card = () => styleCardDiv(currentCardDiv, state.currentCard);
 
+/**
+ * Render all player hands to the DOM.
+ */
 function renderAllHands() {
   state.hands.forEach((hand, i) => {
     if (i >= numPlayers) return;
@@ -184,8 +203,12 @@ function renderAllHands() {
   });
 }
 
-
-
+/**
+ * @memberof UNO
+ * Handle playing a card.
+ * @param {number} playerIndex Index of the player playing the card.
+ * @param {number} cardIndex Index of the card in their hand.
+ */
 function handleCardPlay(playerIndex, cardIndex) {
   const card = state.hands[playerIndex][cardIndex];
   if (!UNOLogic.isValidPlay(card, state.currentCard)) return;
@@ -222,11 +245,10 @@ function handleCardPlay(playerIndex, cardIndex) {
   finalisePlayAndAdvance(nextState);
 }
 
-function applyDraws(hands, player, count) {
-  return R.times(() => UNOLogic.drawCard, count).reduce((acc, drawFn) => drawFn(acc), hands);
-}
+const applyDraws = (hands, player, count) =>
+  R.times(() => UNOLogic.drawCard, count).reduce((acc, drawFn) => drawFn(acc), hands);
 
-function handleColorSelection(card, nextState) {
+const handleColorSelection = (card, nextState) => {
   chooseColorViaPopup().then((selectedColor) => {
     card.color = selectedColor;
     finalisePlayAndAdvance({
@@ -235,8 +257,13 @@ function handleColorSelection(card, nextState) {
       pendingColorChange: false
     });
   });
-}
+};
 
+/**
+ * @memberof UNO
+ * Finalise the current move and advance the game.
+ * @param {GameState} newState The game state after a move.
+ */
 function finalisePlayAndAdvance(newState) {
   turnFinished = true;
   state = newState;
@@ -260,6 +287,9 @@ function finalisePlayAndAdvance(newState) {
   }, waitForUnoTime);
 }
 
+/**
+ * Let the AI perform its turn.
+ */
 function aiPlayTurn() {
   const result = UNOLogic.performAITurn(
     aiPlayerIndex,
@@ -294,6 +324,10 @@ function aiPlayTurn() {
     if (state.turn === aiPlayerIndex) setTimeout(aiPlayTurn, 600);
   }, 1500);
 }
+
+/**
+ * Initialise the game by binding setup and starting UI.
+ */
 function initGame() {
   el("setupModal").showModal();
   el("startGame").onclick = () => {
@@ -343,10 +377,8 @@ el("unoButton").onclick = () => {
   renderAllHands();
 };
 
-// Ensure game initializes after DOM is fully ready
 document.addEventListener("DOMContentLoaded", () => {
   initGame();
 });
-
 
 export default Object.freeze({});

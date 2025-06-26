@@ -1,4 +1,4 @@
-import * as UNOLogic from "./uno-logic.js";
+import * as UNOLogic from "../uno-logic.js";
 
 /**
  * @namespace UNO

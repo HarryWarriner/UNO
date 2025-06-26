@@ -29,7 +29,7 @@
 <nav >
     
     
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="UNO.html">UNO</a></li><li><a href="UNOLogic.html">UNOLogic</a></li></ul><h3>Global</h3><ul><li><a href="global.html#COLORS">COLORS</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#GameState">GameState</a></li><li><a href="global.html#NUMBER_VALUES">NUMBER_VALUES</a></li><li><a href="global.html#SPECIAL_VALUES">SPECIAL_VALUES</a></li><li><a href="global.html#callUno">callUno</a></li><li><a href="global.html#dealHands">dealHands</a></li><li><a href="global.html#declareUno">declareUno</a></li><li><a href="global.html#drawCard">drawCard</a></li><li><a href="global.html#generateHand">generateHand</a></li><li><a href="global.html#generateTurnSummary">generateTurnSummary</a></li><li><a href="global.html#getCardStyle">getCardStyle</a></li><li><a href="global.html#getRandomCard">getRandomCard</a></li><li><a href="global.html#isValidPlay">isValidPlay</a></li><li><a href="global.html#nextTurn">nextTurn</a></li><li><a href="global.html#performAITurn">performAITurn</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="UNO.html">UNO</a><ul class='methods'><li data-type='method'><a href="UNO.html#.advanceTurn">advanceTurn</a></li></ul></li><li><a href="UNOLogic.html">UNOLogic</a><ul class='members'><li data-type='member'><a href="UNOLogic.html#.exports.callUno">exports.callUno</a></li><li data-type='member'><a href="UNOLogic.html#.exports.dealHands">exports.dealHands</a></li><li data-type='member'><a href="UNOLogic.html#.exports.declareUno">exports.declareUno</a></li><li data-type='member'><a href="UNOLogic.html#.exports.drawCard">exports.drawCard</a></li><li data-type='member'><a href="UNOLogic.html#.exports.generateTurnSummary">exports.generateTurnSummary</a></li><li data-type='member'><a href="UNOLogic.html#.exports.getCardStyle">exports.getCardStyle</a></li><li data-type='member'><a href="UNOLogic.html#.exports.getRandomCard">exports.getRandomCard</a></li><li data-type='member'><a href="UNOLogic.html#.exports.isValidPlay">exports.isValidPlay</a></li><li data-type='member'><a href="UNOLogic.html#.exports.nextTurn">exports.nextTurn</a></li><li data-type='member'><a href="UNOLogic.html#.exports.performAITurn">exports.performAITurn</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#COLORS">COLORS</a></li><li><a href="global.html#NUMBER_VALUES">NUMBER_VALUES</a></li><li><a href="global.html#SPECIAL_VALUES">SPECIAL_VALUES</a></li><li><a href="global.html#aiPlayTurn">aiPlayTurn</a></li><li><a href="global.html#initGame">initGame</a></li><li><a href="global.html#renderAllHands">renderAllHands</a></li></ul>
     
 </nav>
 
@@ -75,7 +75,7 @@
 <dl class="details">
     
     <dt class="tag-description">Description:</dt>
-    <dd class="tag-description"><ul class="dummy"><li><p>Functional UNO game logic core.</p></li></ul></dd>
+    <dd class="tag-description"><ul class="dummy"><li><p>Core functional logic for the UNO game, including turn management, AI, and card validation.</p></li></ul></dd>
     
 
     
@@ -108,7 +108,7 @@
     <dt class="tag-author">Author:</dt>
     <dd class="tag-author">
         <ul>
-            <li>Harry</li>
+            <li>Harry Warriner</li>
         </ul>
     </dd>
     
@@ -172,9 +172,851 @@
     
 
     
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id=".exports.callUno"><span class="type-signature type-signature-static, constant">(static, constant) </span>exports.callUno<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Attempt to call UNO on opponents.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uno-logic.js.html">uno-logic.js</a>, <a href="uno-logic.js.html#line125">line 125</a>
+    </li></ul></dd>
+    
 
     
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Attempt to call UNO on opponents.</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".exports.dealHands"><span class="type-signature type-signature-static, constant">(static, constant) </span>exports.dealHands<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Deal hands to players.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uno-logic.js.html">uno-logic.js</a>, <a href="uno-logic.js.html#line63">line 63</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Deal hands to players.</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".exports.declareUno"><span class="type-signature type-signature-static, constant">(static, constant) </span>exports.declareUno<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Declare UNO for a player.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uno-logic.js.html">uno-logic.js</a>, <a href="uno-logic.js.html#line108">line 108</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Declare UNO for a player.</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".exports.drawCard"><span class="type-signature type-signature-static, constant">(static, constant) </span>exports.drawCard<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Draw one card and append it to the given hand.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uno-logic.js.html">uno-logic.js</a>, <a href="uno-logic.js.html#line72">line 72</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Draw one card and append it to the given hand.</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".exports.generateTurnSummary"><span class="type-signature type-signature-static, constant">(static, constant) </span>exports.generateTurnSummary<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Generate a summary of the last turn.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uno-logic.js.html">uno-logic.js</a>, <a href="uno-logic.js.html#line169">line 169</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Generate a summary of the last turn.</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".exports.getCardStyle"><span class="type-signature type-signature-static, constant">(static, constant) </span>exports.getCardStyle<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Get CSS class and label for a card.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uno-logic.js.html">uno-logic.js</a>, <a href="uno-logic.js.html#line144">line 144</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Get CSS class and label for a card.</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".exports.getRandomCard"><span class="type-signature type-signature-static, constant">(static, constant) </span>exports.getRandomCard<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Create a random UNO card.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uno-logic.js.html">uno-logic.js</a>, <a href="uno-logic.js.html#line35">line 35</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Create a random UNO card.</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".exports.isValidPlay"><span class="type-signature type-signature-static, constant">(static, constant) </span>exports.isValidPlay<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Check if a given card is playable against the current card.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uno-logic.js.html">uno-logic.js</a>, <a href="uno-logic.js.html#line82">line 82</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Check if a given card is playable against the current card.</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".exports.nextTurn"><span class="type-signature type-signature-static, constant">(static, constant) </span>exports.nextTurn<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Get the index of the next player.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uno-logic.js.html">uno-logic.js</a>, <a href="uno-logic.js.html#line96">line 96</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Get the index of the next player.</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".exports.performAITurn"><span class="type-signature type-signature-static, constant">(static, constant) </span>exports.performAITurn<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Perform an AI player's turn.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uno-logic.js.html">uno-logic.js</a>, <a href="uno-logic.js.html#line193">line 193</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Perform an AI player's turn.</p>
+</div>
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+<h4 class="name" id=".Card">Card</h4>
+
+
+
+
+
+<dl class="details">
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uno-logic.js.html">uno-logic.js</a>, <a href="uno-logic.js.html#line13">line 13</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>&quot;1&quot;–&quot;9&quot;, &quot;+2&quot;, &quot;+4&quot;, &quot;Skip&quot;, &quot;Reverse&quot;</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>color</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>&quot;Red&quot;, &quot;Green&quot;, &quot;Blue&quot;, or &quot;Yellow&quot; (undefined for Wild cards)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+    <h5 class="h5-types">Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
     
 
     
@@ -192,7 +1034,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Thu Jun 26 2025 13:27:04 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Thu Jun 26 2025 13:51:30 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
