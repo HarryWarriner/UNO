@@ -20,21 +20,6 @@
             ]
         },
         {
-            "name": "View Docs",
-            "type": "firefox",
-            "request": "launch",
-            "reAttach": true,
-            "reloadOnAttach": true,
-            "file": "${workspaceFolder}/docs/index.html",
-            "preferences": {
-                "security.fileuri.strict_origin_policy": false
-            },
-            "skipFiles": [
-                "${workspaceFolder}/node_modules/**",
-                "<node_internals>/**"
-            ]
-        },
-        {
             "name": "Debug Module",
             "type": "node",
             "request": "launch",
