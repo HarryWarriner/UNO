@@ -74,12 +74,29 @@ document.addEventListener("DOMContentLoaded", () => {
     numPlayers = parseInt(el("numPlayersInput").value) || 2;
     aiPlayerIndex = el("vsAI").checked ? 1 : null;
     state = createInitialState();
+    renderPlayerLabels();
     turnFinished = false;
     setupModal.close();
-    for (let i = numPlayers; i < 4; i++) {
+    for (let i = 0; i < 4; i++) {
       const playerEl = el(`player-${i}`);
-      if (playerEl) playerEl.style.display = "none";
+      const labelEl = el(`playerLabel${i}`);
+      const countEl = el(`cardCount${i}`);
+      const labelSlot = el(`label-slot-${i}`);
+
+      const isActive = i < numPlayers;
+
+      if (playerEl) playerEl.style.display = isActive ? "" : "none";
+      if (labelSlot) labelSlot.style.display = isActive ? "" : "none";
+      if (labelEl) {
+        labelEl.textContent = isActive ? `Player ${i + 1}${i === aiPlayerIndex ? " (AI)" : ""}` : "";
+        labelEl.style.display = isActive ? "" : "none";
+      }
+      if (countEl) {
+        countEl.textContent = isActive ? state.hands[i].length : "";
+        countEl.style.display = isActive ? "" : "none";
+      }
     }
+
     showTurnPopup();
     updateDirectionArrows();
   };
@@ -111,6 +128,7 @@ function rotateIndex(i) {
 
 function renderAllHands() {
   state.hands.forEach((hand, i) => {
+    if (i >= numPlayers) return;
     const rotated = rotateIndex(i);
     const handEl = el(`hand-${rotated}`);
     const playerEl = el(`player-${rotated}`);
@@ -118,7 +136,17 @@ function renderAllHands() {
 
     playerEl.className = "player";
     playerEl.classList.add(["player-bottom", "player-left", "player-top", "player-right"][rotated]);
-    playerEl.querySelector(".label").textContent = `Player ${i + 1}${i === aiPlayerIndex ? " (AI)" : ""}`;
+    const labelEl = document.getElementById(`playerLabel${i}`);
+    if (labelEl) {
+      labelEl.textContent = `Player ${i + 1}${i === aiPlayerIndex ? " (AI)" : ""}`;
+    }
+
+    const countEl = document.getElementById(`cardCount${i}`);
+    if (countEl) {
+      countEl.textContent = hand.length;
+    }
+
+
 
     const isCurrent = i === state.turn;
     const isAI = i === aiPlayerIndex;
@@ -139,7 +167,51 @@ function renderAllHands() {
       handEl.appendChild(div);
     });
   });
+  renderPlayerLabels();
 }
+
+function renderPlayerLabels() {
+  for (let i = 0; i < 4; i++) {
+    const labelSlot = document.getElementById(`label-slot-${i}`);
+    const labelSpan = document.getElementById(`playerLabel${i}`);
+    const countSpan = document.getElementById(`cardCount${i}`);
+    const shieldSpan = document.getElementById(`shield${i}`);
+
+    // Hide everything for players beyond numPlayers
+    if (i >= numPlayers) {
+      if (labelSlot) labelSlot.style.display = "none";
+      if (labelSpan) labelSpan.style.display = "none";
+      if (countSpan) countSpan.style.display = "none";
+      if (shieldSpan) shieldSpan.style.display = "none";
+      continue;
+    }
+
+    // Show label slot
+    if (labelSlot) labelSlot.style.display = "";
+
+    const playerIndex = (i + state.turn) % state.hands.length;
+
+    if (labelSpan) {
+      labelSpan.style.display = "";
+      labelSpan.textContent = `Player ${playerIndex + 1}${playerIndex === aiPlayerIndex ? " (AI)" : ""}`;
+    }
+
+    if (countSpan) {
+      countSpan.style.display = "";
+      countSpan.textContent = state.hands[playerIndex]?.length ?? 0;
+    }
+
+    if (shieldSpan) {
+      shieldSpan.style.display = state.protectedPlayers.has(playerIndex) ? "inline" : "none";
+    }
+  }
+}
+
+
+
+
+
+
 
 function handleCardPlay(playerIndex, cardIndex) {
   const card = state.hands[playerIndex][cardIndex];
@@ -209,19 +281,33 @@ function finalisePlayAndAdvance(newState) {
   render_current_card();
   renderAllHands();
   disableCurrentPlayerHand();
-  showTurnSummary(state.currentCard);
+  if (state.hands[state.turn].length === 0) {
+    showEndGameDialog(state.turn);
+    return;
+  }
+
+  const currentPlayer = state.turn;
+  const remainingCards = state.hands[currentPlayer].length;
+  const isPlayer = currentPlayer !== aiPlayerIndex;
+
+  const waitForUnoTime = (remainingCards === 1 && isPlayer) ? 2000 : 0;
 
   setTimeout(() => {
-    state = advanceTurn(state);
-    turnFinished = false;
+    showTurnSummary(state.currentCard);
 
-    if (state.turn === aiPlayerIndex) {
-      setTimeout(aiPlayTurn, 600);
-    } else {
-      showTurnPopup();
-    }
-  }, 1500);
+    setTimeout(() => {
+      state = advanceTurn(state);
+      turnFinished = false;
+
+      if (state.turn === aiPlayerIndex) {
+        setTimeout(aiPlayTurn, 600);
+      } else {
+        showTurnPopup();
+      }
+    }, 1500); // after summary is shown
+  }, waitForUnoTime);
 }
+
 
 
 function disableCurrentPlayerHand() {
@@ -312,6 +398,11 @@ function aiPlayTurn() {
     direction: result.direction,
     skipNext: result.skipNext
   };
+  const aiHand = state.hands[aiPlayerIndex];
+  if (aiHand.length === 1 && Math.random() < 0.8) {
+    state.protectedPlayers.add(aiPlayerIndex); // AI declares UNO
+    renderPlayerLabels(); // show shield
+  }
 
   updateDirectionArrows(); 
   turnFinished = true;
@@ -332,7 +423,8 @@ function aiPlayTurn() {
 el("unoButton").onclick = () => {
   const currentHand = state.hands[state.turn];
   if (UNOLogic.declareUno(state.turn, state.hands, state.protectedPlayers)) {
-    alert("You're protected! UNO declared.");
+    const shieldSpan = document.getElementById(`shield${state.turn}`);
+    if (shieldSpan) shieldSpan.style.display = "inline";
     return;
   }
 
@@ -349,5 +441,15 @@ el("unoButton").onclick = () => {
 
   renderAllHands();
 };
+
+function showEndGameDialog(winnerIndex) {
+  const modal = el("endGameModal");
+  const winnerText = el("winnerText");
+  const isAI = winnerIndex === aiPlayerIndex;
+
+  winnerText.textContent = `🎉 ${isAI ? "AI" : "Player " + (winnerIndex + 1)} wins! Well done!`;
+  modal.showModal();
+}
+
 
 export default Object.freeze({});

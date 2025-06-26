@@ -11,40 +11,69 @@
     <div class="game-board">
       <div class="player" id="player-2">
         <div class="hand-container">
-          <div class="label">PLAYER 3</div>
           <div class="hand" id="hand-2"></div>
         </div>
       </div>
       <div class="player" id="player-0">
         <div class="hand-container">
-          <div class="label">PLAYER 1</div>
           <div class="hand" id="hand-0"></div>
         </div>
       </div>
       <div class="player" id="player-1">
         <div class="hand-container">
-          <div class="label">PLAYER 2</div>
           <div class="hand" id="hand-1"></div>
         </div>
       </div>
       <div class="player" id="player-3">
         <div class="hand-container">
-          <div class="label">PLAYER 4</div>
           <div class="hand" id="hand-3"></div>
         </div>
       </div>
-
+      <div class="label-stack">
       <div class="center-stack">
-        <button class="buttoncss" id="drawButton">Draw Card</button>
-        <div class="card card-back" id="deck"></div>
-        <div class="card" id="currentCard"></div>
-        <button class="buttoncss" id="unoButton">UNO!</button>
+        <div class="stack-item">
+          <div class="stack-label">Draw</div>
+          <button class="card card-back" id="drawButton"></button>
+        </div>
+
+        <div class="stack-item">
+          <div class="stack-label">Current Card</div>
+          <div class="card" id="currentCard"></div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-label" style="visibility: hidden;">Label</div>
+          <button class="card uno-button" id="unoButton">  <span class="uno-text">UNO!</span></button>
+        </div>
+        
         <div class="direction-arrows" id="directionArrows" data-direction="1">
           <div class="arrow">&#10140;</div>
           <div class="arrow">&#10140;</div>
           <div class="arrow">&#10140;</div>
         </div>
+        
       </div>
+      <div class="label label-bottom" id="label-slot-0">
+        <span class="shield" id="shield0">🛡️</span>
+        <span id="playerLabel0" class="player-label"></span> (<span class="cardcount" id="cardCount0"></span>)
+      </div>
+      <div class="label label-left" id="label-slot-1">
+        <span class="shield" id="shield1">🛡️</span>
+        <span id="playerLabel1" class="player-label"></span> (<span class="cardcount" id="cardCount1"></span>)
+      </div>
+      <div class="label label-top" id="label-slot-2">
+        <span class="shield" id="shield2">🛡️</span>
+        <span id="playerLabel2" class="player-label"></span> (<span class="cardcount" id="cardCount2"></span>)
+      </div>
+      <div class="label label-right" id="label-slot-3">
+        <span class="shield" id="shield3">🛡️</span>
+        <span id="playerLabel3" class="player-label"></span> (<span class="cardcount" id="cardCount3"></span>)
+      </div>
+
+      </div>
+      
+
+
+
     </div>
 
     <!-- Start Game Modal -->
@@ -83,5 +112,11 @@
         <button class="color-option" data-color="Yellow">Yellow</button>
       </div>
     </dialog>
+<!-- End Game Message-->
+    <dialog id="endGameModal">
+  <h2 id="winnerText"></h2>
+  <button onclick="location.reload()">Restart Game</button>
+</dialog>
+
   </body>
 </html>

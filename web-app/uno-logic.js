@@ -44,7 +44,7 @@ export const createHands = (numPlayers) =>
  * @returns {Card[][]}
  */
 export const dealHands = (numPlayers) =>
-  R.times(() => R.times(getRandomCard, 7), numPlayers);
+  R.times(() => R.times(getRandomCard, 2), numPlayers);
 
 /**
  * Add a card to the player's hand.
