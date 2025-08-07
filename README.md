@@ -1,12 +1,6 @@
 # UNO
 
-## To do:
+## This was for a Uni project.
+It is working, but not on a website, ill get back to this soon and finish it for play.
 
-- Make it more obvious that the turns are switching
-- If against ai then all opponents are ai
-- ~~ Make the reverse arrows work ~~
-- Make the board resizeable
-- Make UI better
-- JSdoc
-  <br>
-- That should be it
+There is a wiki with my Uni notes, but again I need to go through this. (Shrug Emoji (Can't be bothered to find the emoji))
