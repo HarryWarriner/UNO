@@ -54,6 +54,7 @@ This project is a **browser-based UNO-style card game** built for my computing m
 ## 🎥 Play:
 
 Play here:
+[UNO](https://kibibyte.io/Games/UNO/web-app/index.html)
 
 
 
