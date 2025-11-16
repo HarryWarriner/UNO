@@ -178,10 +178,10 @@ function renderAllHands() {
     playerEl.className = "player";
     playerEl.classList.add(["player-bottom", "player-left", "player-top", "player-right"][rotated]);
 
-    const labelEl = el(`playerLabel${i}`);
+    const labelEl = el(`playerLabel${rotated}`);
     if (labelEl) labelEl.textContent = `Player ${i + 1}${i === aiPlayerIndex ? " (AI)" : ""}`;
 
-    const countEl = el(`cardCount${i}`);
+    const countEl = el(`cardCount${rotated}`);
     if (countEl) countEl.textContent = hand.length;
 
     const isCurrent = i === state.turn;
@@ -225,7 +225,7 @@ function handleCardPlay(playerIndex, cardIndex) {
 
   const next = UNOLogic.nextTurn(state.turn, numPlayers, state.direction);
 
-  switch (card.type) {
+  switch (card.value) {
     case "+2":
       nextState.hands = applyDraws(nextState.hands, next, 2);
       break;
@@ -245,8 +245,15 @@ function handleCardPlay(playerIndex, cardIndex) {
   finalisePlayAndAdvance(nextState);
 }
 
-const applyDraws = (hands, player, count) =>
-  R.times(() => UNOLogic.drawCard, count).reduce((acc, drawFn) => drawFn(acc), hands);
+const applyDraws = (hands, player, count) => {
+  const newHands = hands.slice();
+  let hand = hands[player];
+  for (let i = 0; i < count; i++) {
+    hand = UNOLogic.drawCard(hand);
+  }
+  newHands[player] = hand;
+  return newHands;
+};
 
 const handleColorSelection = (card, nextState) => {
   chooseColorViaPopup().then((selectedColor) => {
