@@ -41,14 +41,12 @@ This project is a **browser-based UNO-style card game** built for my computing m
 
 ## 📚 Table of Contents
 
-- [Demo](#-demo)
+- [Play](#-play)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
+- [How to run it yourself](#-how-to-run-it-yourself)
 - [Gameplay](#-gameplay)
 - [Development](#-development)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
 - [License](#-license)
 
 ---
