@@ -61,7 +61,7 @@ Play here:
 
 | Start | 4 Players | Win |
 |---------|---------| ---|
-| ![](assets\start.png) | ![](assets\4Players.png) | ![](assets\win.png) |
+|  <img src="assets\start.png"> | <img src="assets\4Players.png"> |  <img src="assets\win.png"> |
 
 
 ## 🧰 Tech Stack
